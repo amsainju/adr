@@ -4,6 +4,8 @@
 #define TRUE							1
 #define FALSE							0
 
+#define DEBUG_MODE						TRUE
+
 #define DEFAULT_PATH_LENGTH				512
 #define DEFAULT_NUMBER_LENGTH			32
 #define PREAMBLE_LENGTH					16

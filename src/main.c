@@ -407,12 +407,14 @@ int main (int argc, char **argv) {
 	}
 
 	// Print out debug information.
-	printf("Radar bytes: %lu\n", radar_byte_counter);
-	printf("Profiles processed: %I64u\n", profile_count);
-	printf("\t\tShort: %I64u\n", short_profile_count);
-	printf("\t\t\tIndex: %I64u\n", short_index);
-	printf("\t\tLong: %I64u\n", long_profile_count);
-	printf("\t\t\tIndex: %I64u\n", long_index);
+	if (DEBUG_MODE) {
+		printf("Radar bytes: %lu\n", radar_byte_counter);
+		printf("Profiles processed: %I64u\n", profile_count);
+		printf("\t\tShort: %I64u\n", short_profile_count);
+		printf("\t\t\tIndex: %I64u\n", short_index);
+		printf("\t\tLong: %I64u\n", long_profile_count);
+		printf("\t\t\tIndex: %I64u\n", long_index);
+	}
 
 	// Clean up.
 	matClose(mat_file);
