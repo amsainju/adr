@@ -32,6 +32,7 @@ int main (int argc, char **argv) {
 	unsigned long long int *short_pps, *long_pps;
 	unsigned long long int short_index, long_index, short_profile_count,
 		long_profile_count;
+	mxArray *short_pps_array, *long_pps_array, *short_array, *long_array;
 
 	// Initialize variables.
 	files_processed = 0;
@@ -49,6 +50,11 @@ int main (int argc, char **argv) {
 	pps_counter = 0;
 	mode = 1;
 	sample_size = 1;
+	short_pps_array = NULL;
+	long_pps_array = NULL;
+	short_array = NULL;
+	long_array = NULL;
+	samples_per_profile = 0;
 
 	// Parse input parameters.
 	parameters = parse_command_line_parameters(argc, argv);
@@ -406,6 +412,39 @@ int main (int argc, char **argv) {
 				DEFAULT_PATH_LENGTH-strlen(input_filename));
 	}
 
+	// Create output array structures.
+	short_pps_array = mxCreateDoubleMatrix(1, short_profile_count, mxREAL);
+	long_pps_array = mxCreateDoubleMatrix(1, long_profile_count, mxREAL);
+	short_array = mxCreateDoubleMatrix(samples_per_profile,
+			short_profile_count, mxCOMPLEX);
+	long_array = mxCreateDoubleMatrix(samples_per_profile,
+			long_profile_count, mxCOMPLEX);
+
+	// Write output array structures to output file.
+	if (matPutVariable(mat_file, SHORT_PPS_VARIABLE_NAME, short_pps_array) !=
+			0) {
+		fprintf(stderr, "Error writing %s to .mat file.\n",
+				SHORT_PPS_VARIABLE_NAME);
+		exit(EXIT_FAILURE);
+	}
+	if (matPutVariable(mat_file, LONG_PPS_VARIABLE_NAME, long_pps_array) != 0) {
+		fprintf(stderr, "Error writing %s to .mat file.\n",
+				LONG_PPS_VARIABLE_NAME);
+		exit(EXIT_FAILURE);
+	}
+	if (matPutVariable(mat_file, SHORT_PROFILES_VARIABLE_NAME, short_array) !=
+			0) {
+		fprintf(stderr, "Error writing %s to .mat file.\n",
+				SHORT_PROFILES_VARIABLE_NAME);
+		exit(EXIT_FAILURE);
+	}
+	if (matPutVariable(mat_file, LONG_PROFILES_VARIABLE_NAME, long_array) !=
+			0) {
+		fprintf(stderr, "Error writing %s to .mat file.\n",
+				LONG_PROFILES_VARIABLE_NAME);
+		exit(EXIT_FAILURE);
+	}
+
 	// Print out debug information.
 	if (DEBUG_MODE) {
 		printf("Radar bytes: %lu\n", radar_byte_counter);
@@ -417,7 +456,15 @@ int main (int argc, char **argv) {
 	}
 
 	// Clean up.
-	matClose(mat_file);
+	if (matClose(mat_file) != 0) {
+		fprintf(stderr, "Error closing .mat file.\n");
+		exit(EXIT_FAILURE);
+	}
+
+	mxDestroyArray(short_pps_array);
+	mxDestroyArray(long_pps_array);
+	mxDestroyArray(short_array);
+	mxDestroyArray(long_array);
 
 	free(parameters.target_path);
 	free(parameters.file_limit);

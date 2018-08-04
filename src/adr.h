@@ -6,6 +6,11 @@
 
 #define DEBUG_MODE						TRUE
 
+#define SHORT_PPS_VARIABLE_NAME			"Short_Chirp_PPS_Count_Values"
+#define LONG_PPS_VARIABLE_NAME			"Long_Chirp_PPS_Count_Values"
+#define SHORT_PROFILES_VARIABLE_NAME	"Short_Chirp_Profiles"
+#define LONG_PROFILES_VARIABLE_NAME		"Long_Chirp_Profiles"
+
 #define DEFAULT_PATH_LENGTH				512
 #define DEFAULT_NUMBER_LENGTH			32
 #define PREAMBLE_LENGTH					16
