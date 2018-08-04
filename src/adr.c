@@ -139,3 +139,18 @@ _Bool get_next_byte (FILE *input_file, unsigned char *byte, _Bool new_file,
 
 	return end_file;
 }
+
+_Bool check_sync (unsigned char *read_string) {
+	if ((read_string[0] == 0) &&
+		(read_string[1] == 0) &&
+		(read_string[2] == 0) &&
+		(read_string[3] == 128) &&
+		(read_string[4] == 0) &&
+		(read_string[5] == 0) &&
+		(read_string[6] == 128) &&
+		(read_string[7] == 127)) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}

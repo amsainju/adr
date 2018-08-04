@@ -15,12 +15,43 @@
 #define ARENA_PAYLOAD_LENGTH_LENGTH		4
 
 #define SYNC_LENGTH						8
+#define RADAR_HEADER_TYPE_LENGTH		4
+#define RADAR_HEADER_LENGTH_LENGTH		4
+#define MODE_LENGTH						1
+#define SUBCHANNEL_DATA_SOURCE_LENGTH	1
+#define RESERVED_A_LENGTH				6
+#define ENCODER_LENGTH					4
+#define RESERVED_B_LENGTH				4
+#define RELATIVE_COUNTER_LENGTH			8
+#define PROFILE_COUNTER_LENGTH			8
+#define PPS_FRACTIONAL_COUNTER_LENGTH	8
+#define PPS_COUNTER_LENGTH				8
+#define PROFILE_DATA_FORMAT_LENGTH		4
+#define PROFILE_LENGTH_LENGTH			4
 
 enum data_format_type {
 	SIGNED_16,
 	UNSIGNED_16,
 	SIGNED_32,
 	FLOATING_32
+};
+
+enum radar_header_segments {
+	SYNC,
+	RADAR_HEADER_TYPE,
+	RADAR_HEADER_LENGTH,
+	MODE,
+	SUBCHANNEL_DATA_SOURCE,
+	RESERVED_A,
+	ENCODER,
+	RESERVED_B,
+	RELATIVE_COUNTER,
+	PROFILE_COUNTER,
+	PPS_FRACTIONAL_COUNTER,
+	PPS_COUNTER,
+	PROFILE_DATA_FORMAT,
+	PROFILE_LENGTH,
+	PROFILE_DATA
 };
 
 struct input_parameters {
@@ -32,5 +63,6 @@ struct input_parameters {
 struct input_parameters parse_command_line_parameters(int, char **);
 unsigned long long data_to_num (unsigned char *, unsigned short int);
 _Bool get_next_byte (FILE *, unsigned char *, _Bool, unsigned char *);
+_Bool check_sync (unsigned char *);
 
 #endif /* ADR_H_ */

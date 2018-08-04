@@ -16,11 +16,19 @@ int main (int argc, char **argv) {
 	FILE *input_file;
 	unsigned char *byte_in, *header;
 	_Bool new_file;
-	unsigned long int radar_byte_counter;
+	unsigned long int radar_byte_counter, segment_counter;
+	enum radar_header_segments current_segment;
+	unsigned char *sync_string, *pps_counter_string, *format_string,
+		*profile_length_string;
+	unsigned long long int pps_counter, profile_byte_length, profile_count;
+	enum data_format_type format;
 
 	// Initialize variables.
 	files_processed = 0;
 	radar_byte_counter = 0;
+	segment_counter = 0;
+	current_segment = SYNC;
+	profile_count = 0;
 
 	// Parse input parameters.
 	parameters = parse_command_line_parameters(argc, argv);
@@ -39,6 +47,10 @@ int main (int argc, char **argv) {
 	input_filename = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
 	byte_in = malloc(sizeof(char));
 	header = malloc(HEADER_LENGTH*sizeof(char));
+	sync_string = malloc(SYNC_LENGTH*sizeof(char));
+	pps_counter_string = malloc(PPS_COUNTER_LENGTH*sizeof(char));
+	format_string = malloc(PROFILE_DATA_FORMAT_LENGTH*sizeof(char));
+	profile_length_string = malloc(PROFILE_LENGTH_LENGTH*sizeof(char));
 
 	// Extract relevant information from path.
 	strncpy(input_file_basename, basename(parameters.target_path),
@@ -98,12 +110,124 @@ int main (int argc, char **argv) {
 		new_file = TRUE;
 
 		while (TRUE) {
+			// Read in the next byte and bounce out if we're at the end of data.
 			if (get_next_byte(input_file, byte_in, new_file, header)) {
 				break;
 			}
 
+			// ----- SYNC -----
+			if (current_segment == SYNC) {
+				// Store the current byte in the string.
+				*(sync_string+segment_counter) = *byte_in;
+
+				// If the last byte, check it against the expected sync word.
+				if (segment_counter == (SYNC_LENGTH - 1)) {
+					if (!check_sync(sync_string)) {
+						fprintf(stderr, "Problem reading in sync string.\n");
+						exit(EXIT_FAILURE);
+					}
+				}
+			}
+
+			// ----- RADAR_HEADER_TYPE through PPS_FRACTIONAL_COUNTER -----
+			// We don't use these values, so just eat them up quickly.
+			// Nothing is needed here.
+
+			// ----- PPS_COUNTER -----
+			if (current_segment == PPS_COUNTER) {
+				// Store the current byte in the string.
+				*(pps_counter_string+segment_counter) = *byte_in;
+
+				// If the last byte, convert and store the number.
+				if (segment_counter == (PPS_COUNTER_LENGTH-1)) {
+					pps_counter = data_to_num(pps_counter_string,
+							PPS_COUNTER_LENGTH);
+				}
+			}
+
+			// ----- PROFILE_DATA_FORMAT -----
+			// We only need this once.
+			if (	(current_segment == PROFILE_DATA_FORMAT) &&
+					(profile_count == 0)) {
+				// Store the current byte in the string.
+				*(format_string+segment_counter) = *byte_in;
+
+				// If the last byte, convert and store the type.
+				if (segment_counter == (PROFILE_DATA_FORMAT_LENGTH-1)) {
+					if (format_string[2] == 0) {
+						format = SIGNED_16;
+					} else if (format_string[2] == 1) {
+						format = UNSIGNED_16;
+					} else if (format_string[2] == 2) {
+						format = SIGNED_32;
+					} else if (format_string[2] == 3) {
+						format = FLOATING_32;
+					} else {
+						fprintf(stderr, "Unknown data format type.\n");
+						exit(EXIT_FAILURE);
+					}
+				}
+			}
+
+			// ----- PROFILE_LENGTH -----
+			if (current_segment == PROFILE_LENGTH) {
+				// Store the current byte in the string.
+				*(profile_length_string+segment_counter) = *byte_in;
+
+				// If the last byte, convert and store.
+				if (segment_counter == (PROFILE_LENGTH_LENGTH-1)) {
+					profile_byte_length = data_to_num(profile_length_string,
+							PROFILE_LENGTH_LENGTH);
+				}
+			}
+
+			// Update informational variables.
 			radar_byte_counter++;
 			new_file = FALSE;
+
+			// Update the segment counter and our current segment.
+			if (	(	(current_segment == SYNC) &&
+						(segment_counter == (SYNC_LENGTH-1))) ||
+					(	(current_segment == RADAR_HEADER_TYPE) &&
+						(segment_counter == (RADAR_HEADER_TYPE_LENGTH-1))) ||
+					(	(current_segment == RADAR_HEADER_LENGTH) &&
+						(segment_counter == (RADAR_HEADER_LENGTH_LENGTH-1))) ||
+					(	(current_segment == MODE) &&
+						(segment_counter == (MODE_LENGTH-1))) ||
+					(	(current_segment == SUBCHANNEL_DATA_SOURCE) &&
+						(segment_counter ==
+								(SUBCHANNEL_DATA_SOURCE_LENGTH-1))) ||
+					(	(current_segment == RESERVED_A) &&
+						(segment_counter == (RESERVED_A_LENGTH-1))) ||
+					(	(current_segment == ENCODER) &&
+						(segment_counter == (ENCODER_LENGTH-1))) ||
+					(	(current_segment == RESERVED_B) &&
+						(segment_counter == (RESERVED_B_LENGTH-1))) ||
+					(	(current_segment == RELATIVE_COUNTER) &&
+						(segment_counter == (RELATIVE_COUNTER_LENGTH-1))) ||
+					(	(current_segment == PROFILE_COUNTER) &&
+						(segment_counter == (PROFILE_COUNTER_LENGTH-1))) ||
+					(	(current_segment == PPS_FRACTIONAL_COUNTER) &&
+						(segment_counter ==
+								(PPS_FRACTIONAL_COUNTER_LENGTH-1))) ||
+					(	(current_segment == PPS_COUNTER) &&
+						(segment_counter == (PPS_COUNTER_LENGTH-1))) ||
+					(	(current_segment == PROFILE_DATA_FORMAT) &&
+						(segment_counter == (PROFILE_DATA_FORMAT_LENGTH-1))) ||
+					(	(current_segment == PROFILE_LENGTH) &&
+						(segment_counter == (PROFILE_LENGTH_LENGTH-1))) ||
+					(	(current_segment == PROFILE_DATA) &&
+						(segment_counter == (profile_byte_length-1)))) {
+				segment_counter = 0;
+				if (current_segment == PROFILE_DATA) {
+					current_segment = SYNC;
+					profile_count++;
+				} else {
+					current_segment++;
+				}
+			} else {
+				segment_counter++;
+			}
 		}
 
 		// Close file.
@@ -120,6 +244,7 @@ int main (int argc, char **argv) {
 	}
 
 	printf("Radar bytes: %lu\n", radar_byte_counter);
+	printf("Profiles processed: %I64u\n", profile_count);
 
 	// Clean up.
 	matClose(mat_file);
@@ -140,6 +265,10 @@ int main (int argc, char **argv) {
 	free(input_filename);
 	free(byte_in);
 	free(header);
+	free(sync_string);
+	free(pps_counter_string);
+	free(format_string);
+	free(profile_length_string);
 
 	return 0;
 }
