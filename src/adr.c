@@ -34,7 +34,8 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 				// Is this a valid path/file?
 				temp_file = fopen(parameters.target_path, "rb");
 				if (temp_file == NULL) {
-					fprintf(stderr, "Could not open %s. Exiting.\n", parameters.target_path);
+					fprintf(stderr, "Could not open %s. Exiting.\n",
+							parameters.target_path);
 					exit(EXIT_FAILURE);
 				} else {
 					fclose(temp_file);
@@ -51,7 +52,8 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 				// Grab the needed information from the parameter list.
 				*(parameters.file_limit) = TRUE;
 				strncpy(input_string, argv[++i], DEFAULT_NUMBER_LENGTH);
-				*(parameters.max_files) = (unsigned short int) atoi(input_string);
+				*(parameters.max_files) =
+						(unsigned short int) atoi(input_string);
 			} else {
 				// Not enough parameters left to do this. Exit.
 				fprintf(stderr, "No parameter given after \"-m\". Exiting.\n");
@@ -60,15 +62,18 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 		} else {
 			// Unknown argument.
 			fprintf(stderr, "usage: adr.exe -i infile [-m max_files]\n");
-			fprintf(stderr, "\t-i infile\tinfile is the input file to begin processing\n");
-			fprintf(stderr, "\t-m max_files\t(optional) process only max_files files.\n");
+			fprintf(stderr,
+					"\t-i infile\tinfile is the input file to begin processing\n");
+			fprintf(stderr,
+					"\t-m max_files\t(optional) process only max_files files.\n");
 			exit(EXIT_FAILURE);
 		}
 	}
 
 	// If we never got an input file, we can't continue.
 	if (!input_file_read) {
-		fprintf(stderr, "Input filename not given on the command line. Exiting.\n");
+		fprintf(stderr,
+				"Input filename not given on the command line. Exiting.\n");
 		exit(EXIT_FAILURE);
 	}
 

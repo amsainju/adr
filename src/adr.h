@@ -29,6 +29,8 @@
 #define PROFILE_DATA_FORMAT_LENGTH		4
 #define PROFILE_LENGTH_LENGTH			4
 
+#define DEFAULT_PROFILE_COUNT			32768
+
 enum data_format_type {
 	SIGNED_16,
 	UNSIGNED_16,

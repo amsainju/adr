@@ -11,7 +11,8 @@ int main (int argc, char **argv) {
 	char *input_file_basename, *path, *preamble, *extended_path, *config_path,
 		*system_path, *data_path, *id_string, *id_num_string, *mat_filename,
 		*input_filename;
-	unsigned short int i, file_id, files_processed;
+	unsigned short int i, file_id, files_processed, sample_byte_count,
+		sample_size, mode;
 	MATFile *mat_file;
 	FILE *input_file;
 	unsigned char *byte_in, *header;
@@ -19,9 +20,18 @@ int main (int argc, char **argv) {
 	unsigned long int radar_byte_counter, segment_counter;
 	enum radar_header_segments current_segment;
 	unsigned char *sync_string, *pps_counter_string, *format_string,
-		*profile_length_string;
+		*profile_length_string, *sample_string;
 	unsigned long long int pps_counter, profile_byte_length, profile_count;
 	enum data_format_type format;
+	short int sample_s16, *short_profiles_s16, *long_profiles_s16;
+	unsigned short int sample_u16, *short_profiles_u16, *long_profiles_u16;
+	long int sample_s32r, sample_s32i, *short_profiles_s32, *long_profiles_s32;
+	float sample_f, *short_profiles_f, *long_profiles_f;
+	unsigned int samples_per_profile;
+	unsigned int profile_structure_length;
+	unsigned long long int *short_pps, *long_pps;
+	unsigned long long int short_index, long_index, short_profile_count,
+		long_profile_count;
 
 	// Initialize variables.
 	files_processed = 0;
@@ -29,6 +39,16 @@ int main (int argc, char **argv) {
 	segment_counter = 0;
 	current_segment = SYNC;
 	profile_count = 0;
+	sample_byte_count = 0;
+	short_index = 0;
+	long_index = 0;
+	short_profile_count = 0;
+	long_profile_count = 0;
+	format = SIGNED_16;
+	profile_byte_length = 0;
+	pps_counter = 0;
+	mode = 1;
+	sample_size = 1;
 
 	// Parse input parameters.
 	parameters = parse_command_line_parameters(argc, argv);
@@ -51,6 +71,17 @@ int main (int argc, char **argv) {
 	pps_counter_string = malloc(PPS_COUNTER_LENGTH*sizeof(char));
 	format_string = malloc(PROFILE_DATA_FORMAT_LENGTH*sizeof(char));
 	profile_length_string = malloc(PROFILE_LENGTH_LENGTH*sizeof(char));
+	short_profiles_s16 = malloc(1);
+	long_profiles_s16 = malloc(1);
+	short_profiles_u16 = malloc(1);
+	long_profiles_u16 = malloc(1);
+	short_profiles_s32 = malloc(1);
+	long_profiles_s32 = malloc(1);
+	short_profiles_f = malloc(1);
+	long_profiles_f = malloc(1);
+	long_pps = malloc(1);
+	short_pps = malloc(1);
+	sample_string = malloc(1);
 
 	// Extract relevant information from path.
 	strncpy(input_file_basename, basename(parameters.target_path),
@@ -129,9 +160,22 @@ int main (int argc, char **argv) {
 				}
 			}
 
-			// ----- RADAR_HEADER_TYPE through PPS_FRACTIONAL_COUNTER -----
+			// ----- RADAR_HEADER_TYPE through RADAR_HEADER_LENGTH -----
 			// We don't use these values, so just eat them up quickly.
 			// Nothing is needed here.
+
+			// ----- MODE -----
+			if (current_segment == MODE) {
+				// This is only one byte, so you have what you need.
+				mode = (unsigned short int) *byte_in;
+				if ((mode != 0) && (mode != 3)) {
+					fprintf(stderr, "Unknown mode encountered.\n");
+					exit(EXIT_FAILURE);
+				}
+			}
+
+			// ----- SUBCHANNEL_DATA_SOURCE through PPS_FRACTIONAL_COUNTER -----
+			// We don't use these values either.
 
 			// ----- PPS_COUNTER -----
 			if (current_segment == PPS_COUNTER) {
@@ -147,6 +191,7 @@ int main (int argc, char **argv) {
 
 			// ----- PROFILE_DATA_FORMAT -----
 			// We only need this once.
+			// This will also reallocate the memory for each sample only once.
 			if (	(current_segment == PROFILE_DATA_FORMAT) &&
 					(profile_count == 0)) {
 				// Store the current byte in the string.
@@ -156,16 +201,24 @@ int main (int argc, char **argv) {
 				if (segment_counter == (PROFILE_DATA_FORMAT_LENGTH-1)) {
 					if (format_string[2] == 0) {
 						format = SIGNED_16;
+						sample_size = 2;
 					} else if (format_string[2] == 1) {
 						format = UNSIGNED_16;
+						sample_size = 2;
 					} else if (format_string[2] == 2) {
 						format = SIGNED_32;
+						sample_size = 8;
 					} else if (format_string[2] == 3) {
 						format = FLOATING_32;
+						sample_size = 8;
 					} else {
 						fprintf(stderr, "Unknown data format type.\n");
 						exit(EXIT_FAILURE);
 					}
+
+					// Allocate memory for temporary sample storage.
+					sample_string = realloc(sample_string,
+							sample_size*sizeof(char));
 				}
 			}
 
@@ -178,6 +231,116 @@ int main (int argc, char **argv) {
 				if (segment_counter == (PROFILE_LENGTH_LENGTH-1)) {
 					profile_byte_length = data_to_num(profile_length_string,
 							PROFILE_LENGTH_LENGTH);
+
+					// Also here, if we're on the first profile, go ahead and
+					//   allocate data for the profile matrices.
+					if (profile_count == 0) {
+						samples_per_profile = profile_byte_length / sample_size;
+						profile_structure_length =
+								samples_per_profile * DEFAULT_PROFILE_COUNT;
+						if (format == SIGNED_16) {
+							short_profiles_s16 = realloc(short_profiles_s16,
+									profile_structure_length);
+							long_profiles_s16 = realloc(long_profiles_s16,
+									profile_structure_length);
+						} else if (format == UNSIGNED_16) {
+							short_profiles_u16 = realloc(short_profiles_u16,
+									profile_structure_length);
+							long_profiles_u16 = realloc(long_profiles_u16,
+									profile_structure_length);
+						} else if (format == SIGNED_32) {
+							short_profiles_s32 = realloc(short_profiles_s32,
+									profile_structure_length);
+							long_profiles_s32 = realloc(long_profiles_s32,
+									profile_structure_length);
+						} else if (format == FLOATING_32) {
+							short_profiles_f = realloc(short_profiles_f,
+									profile_structure_length);
+							long_profiles_f = realloc(long_profiles_f,
+									profile_structure_length);
+						}
+						short_pps = realloc(short_pps,
+								sizeof(unsigned long long int) *
+								profile_structure_length);
+						long_pps = realloc(long_pps,
+								sizeof(unsigned long long int) *
+								profile_structure_length);
+						// TODO: if we run out of space, reallocate.
+					}
+				}
+			}
+
+			// ----- PROFILE_DATA -----
+			if (current_segment == PROFILE_DATA) {
+				// Store the current byte in the string.
+				*(sample_string+sample_byte_count++) = *byte_in;
+
+				// If the last byte of a sample,
+				//   - reset the sample_byte_count,
+				//   - convert the sample according to its data format, and
+				//   - store the converted data in the profile structure.
+				if (sample_byte_count == sample_size) {
+					// Reset the sample_byte_count.
+					sample_byte_count = 0;
+
+					// Convert the sample according to its data format and
+					//   store in the profile structure.
+					if (format == SIGNED_16) {
+						sample_s16 =
+								(*(sample_string+1) << 8) + *(sample_string);
+						if (mode == 0) {
+							*(short_profiles_s16+short_index++) = sample_s16;
+						} else if (mode == 3) {
+							*(long_profiles_s16+long_index++) = sample_s16;
+						}
+					} else if (format == UNSIGNED_16) {
+						sample_u16 =
+								(*(sample_string+1) << 8) + *(sample_string);
+						if (mode == 0) {
+							*(short_profiles_u16+short_index++) = sample_u16;
+						} else if (mode == 3) {
+							*(long_profiles_u16+long_index++) = sample_u16;
+						}
+					} else if (format == SIGNED_32) {
+						sample_s32r =
+								(*(sample_string+3) << 24) +
+								(*(sample_string+2) << 16) +
+								(*(sample_string+1) << 8) +
+								*(sample_string);
+						sample_s32i =
+								(*(sample_string+7) << 24) +
+								(*(sample_string+6) << 16) +
+								(*(sample_string+5) << 8) +
+								*(sample_string+4);
+						if (mode == 0) {
+							*(short_profiles_s32+short_index++) = sample_s32r;
+							*(short_profiles_s32+short_index++) = sample_s32i;
+						} else if (mode == 3) {
+							*(long_profiles_s32+long_index++) = sample_s32r;
+							*(long_profiles_s32+long_index++) = sample_s32i;
+						}
+					} else if (format == FLOATING_32) {
+						sample_f =
+								(*(sample_string+3) << 24) +
+								(*(sample_string+2) << 16) +
+								(*(sample_string+1) << 8) +
+								*(sample_string);
+						if (mode == 0) {
+							*(short_profiles_f+short_index++) = sample_f;
+						} else if (mode == 3) {
+							*(long_profiles_f+long_index++) = sample_f;
+						}
+					}
+				}
+
+				// If the last byte of the profile, increment the appropriate
+				//   profile counter and store the PPS counter.
+				if (segment_counter == (profile_byte_length-1)) {
+					if (mode == 0) {
+						*(short_pps+short_profile_count++) = pps_counter;
+					} else if (mode == 3) {
+						*(long_pps+long_profile_count++) = pps_counter;
+					}
 				}
 			}
 
@@ -243,8 +406,13 @@ int main (int argc, char **argv) {
 				DEFAULT_PATH_LENGTH-strlen(input_filename));
 	}
 
+	// Print out debug information.
 	printf("Radar bytes: %lu\n", radar_byte_counter);
 	printf("Profiles processed: %I64u\n", profile_count);
+	printf("\t\tShort: %I64u\n", short_profile_count);
+	printf("\t\t\tIndex: %I64u\n", short_index);
+	printf("\t\tLong: %I64u\n", long_profile_count);
+	printf("\t\t\tIndex: %I64u\n", long_index);
 
 	// Clean up.
 	matClose(mat_file);
@@ -269,6 +437,17 @@ int main (int argc, char **argv) {
 	free(pps_counter_string);
 	free(format_string);
 	free(profile_length_string);
+	free(sample_string);
+	free(short_profiles_s16);
+	free(long_profiles_s16);
+	free(short_profiles_u16);
+	free(long_profiles_u16);
+	free(short_profiles_s32);
+	free(long_profiles_s32);
+	free(short_profiles_f);
+	free(long_profiles_f);
+	free(short_pps);
+	free(long_pps);
 
 	return 0;
 }
