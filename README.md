@@ -1,6 +1,9 @@
 # adr
 Data reader for the ARENA 313 modules.
 
+## Release version
+The release version of this software may be downloaded from the 'binaries' subdirectory.
+
 ## Important notes
 Please ensure that your MATLAB binary folder is on your system (or user) path. For example, for a default MATLAB R2018a installation, this would be 'C:\Program Files\MATLAB\R2018a\bin\win64'.
 
