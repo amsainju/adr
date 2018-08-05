@@ -36,7 +36,7 @@ to show usage information.
 Note that you do not have to use this executable from the same directory as the data files, so long as you provide the complete path to the executable. Use double quotes if there is a space in the path.
 
 ## MATLAB import
-This software stores data in MATLAB matrices in a .mat file that uses the file naming convention of the data files from whence the data came. For example, if the data came from a data file named '20180709_180156_Channel7_0000.dat', it would be named '20180709_180156.mat' and located in the same file as the data files.
+This software stores data in MATLAB matrices in a .mat file that uses the file naming convention of the data files from whence the data came. For example, if the data came from a data file named '20180709_180156_Channel7_0000.dat', it would be named '20180709_180156.mat' and located in the same folder as the data files.
 
 To import this data into MATLAB, you would simply use the command:
 ```
