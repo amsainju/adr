@@ -413,12 +413,62 @@ int main (int argc, char **argv) {
 	}
 
 	// Create output array structures.
-	short_pps_array = mxCreateDoubleMatrix(1, short_profile_count, mxREAL);
-	long_pps_array = mxCreateDoubleMatrix(1, long_profile_count, mxREAL);
-	short_array = mxCreateDoubleMatrix(samples_per_profile,
-			short_profile_count, mxCOMPLEX);
-	long_array = mxCreateDoubleMatrix(samples_per_profile,
-			long_profile_count, mxCOMPLEX);
+	short_pps_array = mxCreateNumericMatrix(1, short_profile_count,
+			mxUINT64_CLASS, mxREAL);
+	long_pps_array = mxCreateNumericMatrix(1, long_profile_count,
+			mxUINT64_CLASS, mxREAL);
+	if (format == SIGNED_16) {
+		short_array = mxCreateNumericMatrix(samples_per_profile,
+				short_profile_count, mxINT16_CLASS, mxREAL);
+		long_array = mxCreateNumericMatrix(samples_per_profile,
+				long_profile_count, mxINT16_CLASS, mxREAL);
+	} else if (format == UNSIGNED_16) {
+		short_array = mxCreateNumericMatrix(samples_per_profile,
+				short_profile_count, mxUINT16_CLASS, mxREAL);
+		long_array = mxCreateNumericMatrix(samples_per_profile,
+				long_profile_count, mxUINT16_CLASS, mxREAL);
+	} else if (format == SIGNED_32) {
+		short_array = mxCreateNumericMatrix(samples_per_profile,
+				short_profile_count, mxINT32_CLASS, mxCOMPLEX);
+		long_array = mxCreateNumericMatrix(samples_per_profile,
+				long_profile_count, mxINT32_CLASS, mxCOMPLEX);
+	} else if (format == FLOATING_32) {
+		short_array = mxCreateNumericMatrix(samples_per_profile,
+				short_profile_count, mxSINGLE_CLASS, mxREAL);
+		long_array = mxCreateNumericMatrix(samples_per_profile,
+				long_profile_count, mxSINGLE_CLASS, mxREAL);
+	}
+
+	// Write internal profile array structures to output array structures.
+	memcpy((void *) mxGetPr(short_pps_array), (void *) short_pps,
+			1*short_profile_count*sizeof(unsigned long long int));
+	memcpy((void *) mxGetPr(long_pps_array), (void *) long_pps,
+			1*long_profile_count*sizeof(unsigned long long int));
+	if (format == SIGNED_16) {
+		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_s16,
+				samples_per_profile*short_profile_count*sizeof(short int));
+		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_s16,
+				samples_per_profile*long_profile_count*sizeof(short int));
+	} else if (format == UNSIGNED_16) {
+		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_u16,
+				samples_per_profile*short_profile_count*
+				sizeof(unsigned short int));
+		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_u16,
+				samples_per_profile*long_profile_count*
+				sizeof(unsigned short int));
+	} else if (format == SIGNED_32) {
+		memcpy(	(void *) mxGetComplexInt32s(short_array),
+				(void *) short_profiles_s32,
+				samples_per_profile*short_profile_count*sizeof(long int)*2);
+		memcpy( (void *) mxGetComplexInt32s(long_array),
+				(void *) long_profiles_s32,
+				samples_per_profile*long_profile_count*sizeof(long int)*2);
+	} else if (format == FLOATING_32) {
+		memcpy( (void *) mxGetPr(short_array), (void *) short_profiles_f,
+				samples_per_profile*short_profile_count*sizeof(float));
+		memcpy( (void *) mxGetPr(long_array), (void *) long_profiles_f,
+				samples_per_profile*long_profile_count*sizeof(float));
+	}
 
 	// Write output array structures to output file.
 	if (matPutVariable(mat_file, SHORT_PPS_VARIABLE_NAME, short_pps_array) !=
