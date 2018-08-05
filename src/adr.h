@@ -4,7 +4,7 @@
 #define TRUE							1
 #define FALSE							0
 
-#define DEBUG_MODE						TRUE
+#define DEBUG_MODE						FALSE
 
 #define SHORT_PPS_VARIABLE_NAME			"Short_Chirp_PPS_Count_Values"
 #define LONG_PPS_VARIABLE_NAME			"Long_Chirp_PPS_Count_Values"

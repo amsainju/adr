@@ -57,6 +57,7 @@ int main (int argc, char **argv) {
 	samples_per_profile = 0;
 
 	// Parse input parameters.
+	parameters.file_limit = FALSE;
 	parameters = parse_command_line_parameters(argc, argv);
 
 	// Allocate memory.

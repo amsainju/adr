@@ -59,13 +59,20 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 				fprintf(stderr, "No parameter given after \"-m\". Exiting.\n");
 				exit(EXIT_FAILURE);
 			}
+		} else if (!strcmp(argv[i], "-h")) {
+			// Print out help information.
+			printf("usage: adr.exe -i infile [-m max_files] [-p max_profiles]\n");
+			printf("\t-i infile\tinfile is the input file to begin processing\n");
+			printf("\t-m max_files\t(optional) process only max_files files\n");
+			printf("\t-p max_profiles\t(optional) process only max_profiles profiles\n");
 		} else {
 			// Unknown argument.
-			fprintf(stderr, "usage: adr.exe -i infile [-m max_files]\n");
+			fprintf(stderr, "usage: adr.exe -i infile [-m max_files] [-p max_profiles]\n");
 			fprintf(stderr,
 					"\t-i infile\tinfile is the input file to begin processing\n");
 			fprintf(stderr,
-					"\t-m max_files\t(optional) process only max_files files.\n");
+					"\t-m max_files\t(optional) process only max_files files\n");
+			fprintf(stderr, "\t-p max_profiles\t(optional) process only max_profiles profiles\n");
 			exit(EXIT_FAILURE);
 		}
 	}
