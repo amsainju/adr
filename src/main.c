@@ -175,7 +175,7 @@ int main (int argc, char **argv) {
 			if (current_segment == MODE) {
 				// This is only one byte, so you have what you need.
 				mode = (unsigned short int) *byte_in;
-				if ((mode != 0) && (mode != 3)) {
+				if ((mode != LONG_MODE) && (mode != SHORT_MODE)) {
 					fprintf(stderr, "Unknown mode encountered.\n");
 					exit(EXIT_FAILURE);
 				}
@@ -295,17 +295,17 @@ int main (int argc, char **argv) {
 					if (format == SIGNED_16) {
 						sample_s16 =
 								(*(sample_string+1) << 8) + *(sample_string);
-						if (mode == 0) {
+						if (mode == SHORT_MODE) {
 							*(short_profiles_s16+short_index++) = sample_s16;
-						} else if (mode == 3) {
+						} else if (mode == LONG_MODE) {
 							*(long_profiles_s16+long_index++) = sample_s16;
 						}
 					} else if (format == UNSIGNED_16) {
 						sample_u16 =
 								(*(sample_string+1) << 8) + *(sample_string);
-						if (mode == 0) {
+						if (mode == SHORT_MODE) {
 							*(short_profiles_u16+short_index++) = sample_u16;
-						} else if (mode == 3) {
+						} else if (mode == LONG_MODE) {
 							*(long_profiles_u16+long_index++) = sample_u16;
 						}
 					} else if (format == SIGNED_32) {
@@ -319,10 +319,10 @@ int main (int argc, char **argv) {
 								(*(sample_string+6) << 16) +
 								(*(sample_string+5) << 8) +
 								*(sample_string+4);
-						if (mode == 0) {
+						if (mode == SHORT_MODE) {
 							*(short_profiles_s32+short_index++) = sample_s32r;
 							*(short_profiles_s32+short_index++) = sample_s32i;
-						} else if (mode == 3) {
+						} else if (mode == LONG_MODE) {
 							*(long_profiles_s32+long_index++) = sample_s32r;
 							*(long_profiles_s32+long_index++) = sample_s32i;
 						}
@@ -332,9 +332,9 @@ int main (int argc, char **argv) {
 								(*(sample_string+2) << 16) +
 								(*(sample_string+1) << 8) +
 								*(sample_string);
-						if (mode == 0) {
+						if (mode == SHORT_MODE) {
 							*(short_profiles_f+short_index++) = sample_f;
-						} else if (mode == 3) {
+						} else if (mode == LONG_MODE) {
 							*(long_profiles_f+long_index++) = sample_f;
 						}
 					}
@@ -343,9 +343,9 @@ int main (int argc, char **argv) {
 				// If the last byte of the profile, increment the appropriate
 				//   profile counter and store the PPS counter.
 				if (segment_counter == (profile_byte_length-1)) {
-					if (mode == 0) {
+					if (mode == SHORT_MODE) {
 						*(short_pps+short_profile_count++) = pps_counter;
-					} else if (mode == 3) {
+					} else if (mode == LONG_MODE) {
 						*(long_pps+long_profile_count++) = pps_counter;
 					}
 				}

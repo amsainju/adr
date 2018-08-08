@@ -1,12 +1,15 @@
 #ifndef ADR_H_
 #define ADR_H_
 
-#define VERSION							"1.00"
+#define VERSION							"1.01"
 
 #define TRUE							1
 #define FALSE							0
 
 #define DEBUG_MODE						FALSE
+
+#define LONG_MODE						0
+#define SHORT_MODE						3
 
 #define SHORT_PPS_VARIABLE_NAME			"Short_Chirp_PPS_Count_Values"
 #define LONG_PPS_VARIABLE_NAME			"Long_Chirp_PPS_Count_Values"
