@@ -65,6 +65,10 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			printf("\t-i infile\tinfile is the input file to begin processing\n");
 			printf("\t-m max_files\t(optional) process only max_files files\n");
 			printf("\t-p max_profiles\t(optional) process only max_profiles profiles\n");
+		} else if (!strcmp(argv[i], "-v")) {
+			// Print out version information.
+			printf("ARENA data reader (adr) version %s\n", VERSION);
+			exit(EXIT_SUCCESS);
 		} else {
 			// Unknown argument.
 			fprintf(stderr, "usage: adr.exe -i infile [-m max_files] [-p max_profiles]\n");

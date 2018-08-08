@@ -1,6 +1,8 @@
 #ifndef ADR_H_
 #define ADR_H_
 
+#define VERSION							"1.00"
+
 #define TRUE							1
 #define FALSE							0
 
