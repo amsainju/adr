@@ -161,7 +161,7 @@ int main (int argc, char **argv) {
 				// If the last byte, check it against the expected sync word.
 				if (segment_counter == (SYNC_LENGTH - 1)) {
 					if (!check_sync(sync_string)) {
-						if(resync(input_file, byte_in, new_file, header)) {
+						if(resync(input_file, byte_in, new_file, header, parameters)) {
 							break;
 						}
 					}
@@ -498,7 +498,7 @@ int main (int argc, char **argv) {
 	}
 
 	// Print out debug information.
-	if (DEBUG_MODE) {
+	if (parameters.debug_mode) {
 		printf("Radar bytes: %lu\n", radar_byte_counter);
 		printf("Profiles processed: %I64u\n", profile_count);
 		printf("\t\tShort: %I64u\n", short_profile_count);

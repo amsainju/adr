@@ -1,12 +1,10 @@
 #ifndef ADR_H_
 #define ADR_H_
 
-#define VERSION							"1.02"
+#define VERSION							"1.03"
 
 #define TRUE							1
 #define FALSE							0
-
-#define DEBUG_MODE						FALSE
 
 #define LONG_MODE						0
 #define SHORT_MODE						3
@@ -72,12 +70,13 @@ struct input_parameters {
 	char *target_path;
 	_Bool *file_limit;
 	unsigned short int *max_files;
+	_Bool debug_mode;
 };
 
 struct input_parameters parse_command_line_parameters(int, char **);
 unsigned long long data_to_num (unsigned char *, unsigned short int);
 _Bool get_next_byte (FILE *, unsigned char *, _Bool, unsigned char *);
 _Bool check_sync (unsigned char *);
-_Bool resync (FILE *, unsigned char *, _Bool, unsigned char *);
+_Bool resync (FILE *, unsigned char *, _Bool, unsigned char *, struct input_parameters);
 
 #endif /* ADR_H_ */

@@ -21,6 +21,7 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 	// Initialize local parameters.
 	input_file_read = FALSE;
 	*(parameters.file_limit) = FALSE;
+	parameters.debug_mode = FALSE;
 
 	// Loop through the rest of the parameters.
 	for (i = 1; i < argc; i++) {
@@ -69,6 +70,9 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			// Print out version information.
 			printf("ARENA data reader (adr) version %s\n", VERSION);
 			exit(EXIT_SUCCESS);
+		} else if (!strcmp(argv[i], "-d")) {
+			// Print out debug information.
+			parameters.debug_mode = TRUE;
 		} else {
 			// Unknown argument.
 			fprintf(stderr, "usage: adr.exe -i infile [-m max_files] [-p max_profiles]\n");
@@ -172,20 +176,20 @@ _Bool check_sync (unsigned char *read_string) {
 }
 
 _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
-		unsigned char *header) {
+		unsigned char *header, struct input_parameters parameters) {
 	_Bool end_data;
 
 	end_data = FALSE;
 
 	// Notify that we are resyncing.
-	if (DEBUG_MODE) {
+	if (parameters.debug_mode) {
 		printf("Searching for the sync word...");
 	}
 
 	// Read bytes until a the first byte of a proper sync word is received.
 	while (TRUE) {
 		if (get_next_byte(input_file, byte, new_file, header)) {
-			if (DEBUG_MODE) {
+			if (parameters.debug_mode) {
 				printf("reached end of data.\n");
 			}
 			end_data = TRUE;
@@ -195,7 +199,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 		if (*byte == 0) {
 			// Get the next byte and check the value.
 			if (get_next_byte(input_file, byte, new_file, header)) {
-				if (DEBUG_MODE) {
+				if (parameters.debug_mode) {
 					printf("reached end of data.\n");
 				}
 				end_data = TRUE;
@@ -206,7 +210,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 			if (*byte == 0) {
 				// Get the next byte.
 				if (get_next_byte(input_file, byte, new_file, header)) {
-					if (DEBUG_MODE) {
+					if (parameters.debug_mode) {
 						printf("reached end of data.\n");
 					}
 					end_data = TRUE;
@@ -217,7 +221,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 				if (*byte == 0) {
 					// Get the next byte.
 					if (get_next_byte(input_file, byte, new_file, header)) {
-						if (DEBUG_MODE) {
+						if (parameters.debug_mode) {
 							printf("reached end of data.\n");
 						}
 						end_data = TRUE;
@@ -228,7 +232,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 					if (*byte == 128) {
 						// Get the next byte.
 						if (get_next_byte(input_file, byte, new_file, header)) {
-							if (DEBUG_MODE) {
+							if (parameters.debug_mode) {
 								printf("reached end of data.\n");
 							}
 							end_data = TRUE;
@@ -239,7 +243,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 						if (*byte == 0) {
 							// Get the next byte.
 							if (get_next_byte(input_file, byte, new_file, header)) {
-								if (DEBUG_MODE) {
+								if (parameters.debug_mode) {
 									printf("reached end of data.\n");
 								}
 								end_data = TRUE;
@@ -250,7 +254,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 							if (*byte == 0) {
 								// Get the next byte.
 								if (get_next_byte(input_file, byte, new_file, header)) {
-									if (DEBUG_MODE) {
+									if (parameters.debug_mode) {
 										printf("reached end of data.\n");
 									}
 									end_data = TRUE;
@@ -261,7 +265,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 								if (*byte == 128) {
 									// Get the next byte.
 									if (get_next_byte(input_file, byte, new_file, header)) {
-										if (DEBUG_MODE) {
+										if (parameters.debug_mode) {
 											printf("reached end of data.\n");
 										}
 										end_data = TRUE;
@@ -271,7 +275,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 									// If correct, do it for the eighth byte.
 									if (*byte == 127) {
 										// WE HAVE IT!
-										if (DEBUG_MODE) {
+										if (parameters.debug_mode) {
 											printf("found it!\n");
 										}
 
