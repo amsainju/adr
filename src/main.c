@@ -237,8 +237,9 @@ int main (int argc, char **argv) {
 
 				// If the last byte, convert and store.
 				if (segment_counter == (PROFILE_LENGTH_LENGTH-1)) {
-					profile_byte_length = data_to_num(profile_length_string,
-							PROFILE_LENGTH_LENGTH);
+					//profile_byte_length = data_to_num(profile_length_string,
+							//PROFILE_LENGTH_LENGTH);
+					profile_byte_length = 32768 * sample_size;
 
 					// Also here, if we're on the first profile, go ahead and
 					//   allocate data for the profile matrices.
