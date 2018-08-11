@@ -75,7 +75,7 @@ struct input_parameters {
 
 struct input_parameters parse_command_line_parameters(int, char **);
 unsigned long long data_to_num (unsigned char *, unsigned short int);
-_Bool get_next_byte (FILE *, unsigned char *, _Bool, unsigned char *);
+_Bool get_next_byte (FILE *, unsigned char *, _Bool, unsigned char *, _Bool, unsigned short int);
 _Bool check_sync (unsigned char *);
 _Bool resync (FILE *, unsigned char *, _Bool, unsigned char *, struct input_parameters);
 

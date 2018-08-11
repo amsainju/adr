@@ -149,7 +149,7 @@ int main (int argc, char **argv) {
 
 		while (TRUE) {
 			// Read in the next byte and bounce out if we're at the end of data.
-			if (get_next_byte(input_file, byte_in, new_file, header)) {
+			if (get_next_byte(input_file, byte_in, new_file, header, FALSE, 0)) {
 				break;
 			}
 

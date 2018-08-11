@@ -113,11 +113,18 @@ unsigned long long data_to_num (unsigned char *data, unsigned short int
 }
 
 _Bool get_next_byte (FILE *input_file, unsigned char *byte, _Bool new_file,
-		unsigned char *header) {
+		unsigned char *header, _Bool reindex_flag, unsigned short int reindex_offset) {
 	_Bool end_file;
 
 	static unsigned long int byte_count, packet_byte_count,
 		arena_payload_length;
+
+	// If the reindex flag is given, this call was simply made to correct byte counts. Do so and return without reading more.
+	if (reindex_flag) {
+		byte_count -= reindex_offset;
+		packet_byte_count -= reindex_offset;
+		return FALSE;
+	}
 
 	// If this is a new file, reset our counts.
 	if (new_file) {
@@ -188,7 +195,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 
 	// Read bytes until a the first byte of a proper sync word is received.
 	while (TRUE) {
-		if (get_next_byte(input_file, byte, new_file, header)) {
+		if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 			if (parameters.debug_mode) {
 				printf("reached end of data.\n");
 			}
@@ -198,7 +205,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 
 		if (*byte == 0) {
 			// Get the next byte and check the value.
-			if (get_next_byte(input_file, byte, new_file, header)) {
+			if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 				if (parameters.debug_mode) {
 					printf("reached end of data.\n");
 				}
@@ -209,7 +216,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 			// If it is correct, do the same thing for the next byte.
 			if (*byte == 0) {
 				// Get the next byte.
-				if (get_next_byte(input_file, byte, new_file, header)) {
+				if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 					if (parameters.debug_mode) {
 						printf("reached end of data.\n");
 					}
@@ -220,7 +227,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 				// If correct, do it again.
 				if (*byte == 0) {
 					// Get the next byte.
-					if (get_next_byte(input_file, byte, new_file, header)) {
+					if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 						if (parameters.debug_mode) {
 							printf("reached end of data.\n");
 						}
@@ -231,7 +238,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 					// If correct, do it for the fourth byte.
 					if (*byte == 128) {
 						// Get the next byte.
-						if (get_next_byte(input_file, byte, new_file, header)) {
+						if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 							if (parameters.debug_mode) {
 								printf("reached end of data.\n");
 							}
@@ -242,7 +249,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 						// If correct, do it for the fifth byte.
 						if (*byte == 0) {
 							// Get the next byte.
-							if (get_next_byte(input_file, byte, new_file, header)) {
+							if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 								if (parameters.debug_mode) {
 									printf("reached end of data.\n");
 								}
@@ -253,7 +260,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 							// If correct, do it for the sixth byte.
 							if (*byte == 0) {
 								// Get the next byte.
-								if (get_next_byte(input_file, byte, new_file, header)) {
+								if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 									if (parameters.debug_mode) {
 										printf("reached end of data.\n");
 									}
@@ -264,7 +271,7 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 								// If correct, do it for the seventh byte.
 								if (*byte == 128) {
 									// Get the next byte.
-									if (get_next_byte(input_file, byte, new_file, header)) {
+									if (get_next_byte(input_file, byte, new_file, header, FALSE, 0)) {
 										if (parameters.debug_mode) {
 											printf("reached end of data.\n");
 										}
@@ -285,37 +292,44 @@ _Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
 									// If incorrect, reset the file pointer seven bytes.
 									} else {
 										fseek(input_file, (long int) ((-7) * sizeof(unsigned char)), SEEK_CUR);
+										get_next_byte(input_file, byte, new_file, header, TRUE, 7);
 									}
 
 								// If incorrect, reset the file pointer six bytes.
 								} else {
 									fseek(input_file, (long int) ((-6) * sizeof(unsigned char)), SEEK_CUR);
+									get_next_byte(input_file, byte, new_file, header, TRUE, 6);
 								}
 
 							// If incorrect, reset the file pointer five bytes.
 							} else {
 								fseek(input_file, (long int) ((-5) * sizeof(unsigned char)), SEEK_CUR);
+								get_next_byte(input_file, byte, new_file, header, TRUE, 5);
 							}
 
 						// If incorrect, reset the file pointer four bytes.
 						} else {
 							fseek(input_file, (long int) ((-4) * sizeof(unsigned char)), SEEK_CUR);
+							get_next_byte(input_file, byte, new_file, header, TRUE, 4);
 						}
 
 					// If incorrect, reset the file pointer three bytes.
 					} else {
 						fseek(input_file, (long int) ((-3) * sizeof(unsigned char)), SEEK_CUR);
+						get_next_byte(input_file, byte, new_file, header, TRUE, 3);
 					}
 
 				// If incorrect, reset file pointer two bytes.
 				} else {
 					fseek(input_file, (long int) ((-2) * sizeof(unsigned char)), SEEK_CUR);
+					get_next_byte(input_file, byte, new_file, header, TRUE, 2);
 				}
 
 			// If it is incorrect, reset the file pointer to "back up" this
 			//   byte.
 			} else {
 				fseek(input_file, (long int) ((-1) * sizeof(unsigned char)), SEEK_CUR);
+				get_next_byte(input_file, byte, new_file, header, TRUE, 1);
 			}
 		}
 	}
