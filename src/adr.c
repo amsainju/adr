@@ -170,3 +170,151 @@ _Bool check_sync (unsigned char *read_string) {
 		return FALSE;
 	}
 }
+
+_Bool resync (FILE *input_file, unsigned char *byte, _Bool new_file,
+		unsigned char *header) {
+	_Bool end_data;
+
+	end_data = FALSE;
+
+	// Notify that we are resyncing.
+	if (DEBUG_MODE) {
+		printf("Searching for the sync word...");
+	}
+
+	// Read bytes until a the first byte of a proper sync word is received.
+	while (TRUE) {
+		if (get_next_byte(input_file, byte, new_file, header)) {
+			if (DEBUG_MODE) {
+				printf("reached end of data.\n");
+			}
+			end_data = TRUE;
+			break;
+		}
+
+		if (*byte == 0) {
+			// Get the next byte and check the value.
+			if (get_next_byte(input_file, byte, new_file, header)) {
+				if (DEBUG_MODE) {
+					printf("reached end of data.\n");
+				}
+				end_data = TRUE;
+				break;
+			}
+
+			// If it is correct, do the same thing for the next byte.
+			if (*byte == 0) {
+				// Get the next byte.
+				if (get_next_byte(input_file, byte, new_file, header)) {
+					if (DEBUG_MODE) {
+						printf("reached end of data.\n");
+					}
+					end_data = TRUE;
+					break;
+				}
+
+				// If correct, do it again.
+				if (*byte == 0) {
+					// Get the next byte.
+					if (get_next_byte(input_file, byte, new_file, header)) {
+						if (DEBUG_MODE) {
+							printf("reached end of data.\n");
+						}
+						end_data = TRUE;
+						break;
+					}
+
+					// If correct, do it for the fourth byte.
+					if (*byte == 128) {
+						// Get the next byte.
+						if (get_next_byte(input_file, byte, new_file, header)) {
+							if (DEBUG_MODE) {
+								printf("reached end of data.\n");
+							}
+							end_data = TRUE;
+							break;
+						}
+
+						// If correct, do it for the fifth byte.
+						if (*byte == 0) {
+							// Get the next byte.
+							if (get_next_byte(input_file, byte, new_file, header)) {
+								if (DEBUG_MODE) {
+									printf("reached end of data.\n");
+								}
+								end_data = TRUE;
+								break;
+							}
+
+							// If correct, do it for the sixth byte.
+							if (*byte == 0) {
+								// Get the next byte.
+								if (get_next_byte(input_file, byte, new_file, header)) {
+									if (DEBUG_MODE) {
+										printf("reached end of data.\n");
+									}
+									end_data = TRUE;
+									break;
+								}
+
+								// If correct, do it for the seventh byte.
+								if (*byte == 128) {
+									// Get the next byte.
+									if (get_next_byte(input_file, byte, new_file, header)) {
+										if (DEBUG_MODE) {
+											printf("reached end of data.\n");
+										}
+										end_data = TRUE;
+										break;
+									}
+
+									// If correct, do it for the eighth byte.
+									if (*byte == 127) {
+										// WE HAVE IT!
+										if (DEBUG_MODE) {
+											printf("found it!\n");
+										}
+
+										// Break out of this loop at this point and we'll be where the code expects a proper sync word to have just been read.
+										break;
+
+									// If incorrect, reset the file pointer seven bytes.
+									} else {
+										fseek(input_file, (long int) ((-7) * sizeof(unsigned char)), SEEK_CUR);
+									}
+
+								// If incorrect, reset the file pointer six bytes.
+								} else {
+									fseek(input_file, (long int) ((-6) * sizeof(unsigned char)), SEEK_CUR);
+								}
+
+							// If incorrect, reset the file pointer five bytes.
+							} else {
+								fseek(input_file, (long int) ((-5) * sizeof(unsigned char)), SEEK_CUR);
+							}
+
+						// If incorrect, reset the file pointer four bytes.
+						} else {
+							fseek(input_file, (long int) ((-4) * sizeof(unsigned char)), SEEK_CUR);
+						}
+
+					// If incorrect, reset the file pointer three bytes.
+					} else {
+						fseek(input_file, (long int) ((-3) * sizeof(unsigned char)), SEEK_CUR);
+					}
+
+				// If incorrect, reset file pointer two bytes.
+				} else {
+					fseek(input_file, (long int) ((-2) * sizeof(unsigned char)), SEEK_CUR);
+				}
+
+			// If it is incorrect, reset the file pointer to "back up" this
+			//   byte.
+			} else {
+				fseek(input_file, (long int) ((-1) * sizeof(unsigned char)), SEEK_CUR);
+			}
+		}
+	}
+
+	return end_data;
+}

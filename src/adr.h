@@ -1,7 +1,7 @@
 #ifndef ADR_H_
 #define ADR_H_
 
-#define VERSION							"1.01"
+#define VERSION							"1.02"
 
 #define TRUE							1
 #define FALSE							0
@@ -78,5 +78,6 @@ struct input_parameters parse_command_line_parameters(int, char **);
 unsigned long long data_to_num (unsigned char *, unsigned short int);
 _Bool get_next_byte (FILE *, unsigned char *, _Bool, unsigned char *);
 _Bool check_sync (unsigned char *);
+_Bool resync (FILE *, unsigned char *, _Bool, unsigned char *);
 
 #endif /* ADR_H_ */

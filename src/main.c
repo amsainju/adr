@@ -161,8 +161,9 @@ int main (int argc, char **argv) {
 				// If the last byte, check it against the expected sync word.
 				if (segment_counter == (SYNC_LENGTH - 1)) {
 					if (!check_sync(sync_string)) {
-						fprintf(stderr, "Problem reading in sync string.\n");
-						exit(EXIT_FAILURE);
+						if(resync(input_file, byte_in, new_file, header)) {
+							break;
+						}
 					}
 				}
 			}
