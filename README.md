@@ -34,6 +34,10 @@ where *5* is the maximum number of data files to process.
 adr.exe -h
 ```
 to show usage information.
+```
+adr.exe -i infile -d
+```
+to show debug information while executing.
 
 Note that you do not have to use this executable from the same directory as the data files, so long as you provide the complete path to the executable. Use double quotes if there is a space in the path.
 
