@@ -1,13 +1,15 @@
 #ifndef ADR_H_
 #define ADR_H_
 
-#define VERSION							"1.03"
+#define VERSION							"2.00"
 
 #define TRUE							1
 #define FALSE							0
 
 #define LONG_MODE						0
 #define SHORT_MODE						3
+
+#define RADAR_FILENAME					"radar.tmp.dat"
 
 #define SHORT_PPS_VARIABLE_NAME			"Short_Chirp_PPS_Count_Values"
 #define LONG_PPS_VARIABLE_NAME			"Long_Chirp_PPS_Count_Values"
@@ -40,6 +42,8 @@
 #define PROFILE_LENGTH_LENGTH			4
 
 #define DEFAULT_PROFILE_COUNT			32768
+#define DEFAULT_UDP_PAYLOAD_LENGTH		8192
+#define DEFAULT_PROFILE_BYTE_LENGTH		32768
 
 enum data_format_type {
 	SIGNED_16,
@@ -75,8 +79,7 @@ struct input_parameters {
 
 struct input_parameters parse_command_line_parameters(int, char **);
 unsigned long long data_to_num (unsigned char *, unsigned short int);
-_Bool get_next_byte (FILE *, unsigned char *, _Bool, unsigned char *, _Bool, unsigned short int);
 _Bool check_sync (unsigned char *);
-_Bool resync (FILE *, unsigned char *, _Bool, unsigned char *, struct input_parameters);
+unsigned long long int resync (FILE *, unsigned char *, struct input_parameters);
 
 #endif /* ADR_H_ */
