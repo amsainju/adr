@@ -75,6 +75,7 @@ struct input_parameters {
 	_Bool *file_limit;
 	unsigned short int *max_files;
 	_Bool debug_mode;
+	unsigned short int range;
 };
 
 struct input_parameters parse_command_line_parameters(int, char **);

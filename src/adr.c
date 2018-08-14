@@ -17,6 +17,7 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 	parameters.file_limit = malloc(sizeof(_Bool));
 	parameters.max_files = malloc(sizeof(unsigned short int));
 	input_string = malloc(DEFAULT_NUMBER_LENGTH*sizeof(char));
+	parameters.range = DEFAULT_PROFILE_BYTE_LENGTH;
 
 	// Initialize local parameters.
 	input_file_read = FALSE;
@@ -58,6 +59,17 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			} else {
 				// Not enough parameters left to do this. Exit.
 				fprintf(stderr, "No parameter given after \"-m\". Exiting.\n");
+				exit(EXIT_FAILURE);
+			}
+		} else if (!strcmp(argv[i], "-r")) {
+			// A value for range gates is supplied. Overwrite the default.
+			if ((i + 1) < argc) {
+				// Grab the needed information from the parameter list.
+				strncpy(input_string, argv[++i], DEFAULT_NUMBER_LENGTH);
+				parameters.range = (unsigned short int) atoi(input_string);
+			} else {
+				// Not enough parameters left to do this. Exit.
+				fprintf(stderr, "No parameter given after \"-r\". Exiting.\n");
 				exit(EXIT_FAILURE);
 			}
 		} else if (!strcmp(argv[i], "-h")) {

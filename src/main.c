@@ -346,7 +346,7 @@ int main (int argc, char **argv) {
 				// In this case, we're using a default value due to an ARENA software bug.
 				// The actual value can be parsed from one of the XML files, but we are always
 				//   using the maximum length.
-				profile_byte_length = DEFAULT_PROFILE_BYTE_LENGTH * sample_size;
+				profile_byte_length = parameters.range * sample_size;
 
 				// While here, allocate data for the profile matrices.
 				if (profile_count == 0) {

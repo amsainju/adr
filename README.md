@@ -31,6 +31,10 @@ adr.exe -i infile -m 5
 ```
 where *5* is the maximum number of data files to process.
 ```
+adr.exe -i infile -r 16384
+```
+where 16384 is the number of range gates (this defaults to 32768 if this parameter is not given).
+```
 adr.exe -h
 ```
 to show usage information.
