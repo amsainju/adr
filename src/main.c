@@ -5,7 +5,14 @@
 
 #include "adr.h"
 #include "mat.h"
-
+typedef unsigned long long int ULongLongInt;
+//typedef long int LongInt;
+typedef unsigned int LongInt;
+typedef short int ShortInt;
+//typedef unsigned long int ULongInt;
+typedef unsigned int ULongInt;
+typedef unsigned short int UShortInt;
+typedef unsigned int UInt;
 int main (int argc, char **argv) {
 	char *input_file_basename;
 	char *path;
@@ -18,6 +25,7 @@ int main (int argc, char **argv) {
 	char *id_num_string;
 	char *mat_filename;
 	char *input_filename;
+	char *radar_filename; //Added by Arpan
 	enum data_format_type format;
 	enum radar_header_segments current_segment;
 	FILE *input_file;
@@ -25,18 +33,18 @@ int main (int argc, char **argv) {
 	float *short_profiles_f;
 	float *long_profiles_f;
 	float sample_f;
-	long int *short_profiles_s32;
-	long int *long_profiles_s32;
-	long int sample_s32r;
-	long int sample_s32i;
+	LongInt *short_profiles_s32;
+	LongInt *long_profiles_s32;
+	LongInt sample_s32r;
+	LongInt sample_s32i;
 	MATFile *mat_file;
 	mxArray *short_pps_array;
 	mxArray *long_pps_array;
 	mxArray *short_array;
 	mxArray *long_array;
-	short int *short_profiles_s16;
-	short int *long_profiles_s16;
-	short int sample_s16;
+	ShortInt *short_profiles_s16;
+	ShortInt *long_profiles_s16;
+	ShortInt sample_s16;
 	struct input_parameters parameters;
 	unsigned char *header;
 	unsigned char *byte_in;
@@ -45,30 +53,30 @@ int main (int argc, char **argv) {
 	unsigned char *format_string;
 	unsigned char *sample_string;
 	unsigned char *profile_length_string;
-	unsigned int packet_bytes;
-	unsigned int arena_payload_length;
-	unsigned int samples_per_profile;
-	unsigned int profile_structure_length;
-	unsigned long int segment_counter;
-	unsigned long int radar_byte_counter;
-	unsigned long long int profile_count;
-	unsigned long long int pps_counter;
-	unsigned long long int profile_byte_length;
-	unsigned long long int *short_pps;
-	unsigned long long int *long_pps;
-	unsigned long long int short_index;
-	unsigned long long int long_index;
-	unsigned long long int short_profile_count;
-	unsigned long long int long_profile_count;
-	unsigned short int i;
-	unsigned short int file_id;
-	unsigned short int files_processed;
-	unsigned short int mode;
-	unsigned short int sample_size;
-	unsigned short int *short_profiles_u16;
-	unsigned short int *long_profiles_u16;
-	unsigned short int sample_byte_count;
-	unsigned short int sample_u16;
+	UInt packet_bytes;
+	UInt arena_payload_length;
+	UInt samples_per_profile;
+	UInt profile_structure_length;
+	ULongInt segment_counter;
+	ULongInt radar_byte_counter;
+	ULongLongInt profile_count;
+	ULongLongInt pps_counter;
+	ULongLongInt profile_byte_length;
+	ULongLongInt *short_pps;
+	ULongLongInt *long_pps;
+	ULongLongInt short_index;
+	ULongLongInt long_index;
+	ULongLongInt short_profile_count;
+	ULongLongInt long_profile_count;
+	UShortInt i;
+	UShortInt file_id;
+	UShortInt files_processed;
+	UShortInt mode;
+	UShortInt sample_size;
+	UShortInt *short_profiles_u16;
+	UShortInt *long_profiles_u16;
+	UShortInt sample_byte_count;
+	UShortInt sample_u16;
 
 	// Parse input parameters.
 	parameters.debug_mode = FALSE;
@@ -106,6 +114,7 @@ int main (int argc, char **argv) {
 	id_num_string = malloc(DEFAULT_NUMBER_LENGTH*sizeof(char));
 	mat_filename = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
 	input_filename = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
+	radar_filename = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
 	header = malloc(HEADER_LENGTH*sizeof(unsigned char));
 	byte_in = malloc(sizeof(unsigned char));
 	sync_string = malloc(SYNC_LENGTH*sizeof(unsigned char));
@@ -113,16 +122,16 @@ int main (int argc, char **argv) {
 	format_string = malloc(PROFILE_DATA_FORMAT_LENGTH*sizeof(unsigned char));
 	sample_string = malloc(sizeof(unsigned char));
 	profile_length_string = malloc(PROFILE_LENGTH_LENGTH*sizeof(unsigned char));
-	short_profiles_s16 = malloc(sizeof(short int));
-	long_profiles_s16 = malloc(sizeof(short int));
-	short_profiles_u16 = malloc(sizeof(unsigned short int));
-	long_profiles_u16 = malloc(sizeof(unsigned short int));
-	short_profiles_s32 = malloc(sizeof(long int));
-	long_profiles_s32 = malloc(sizeof(long int));
+	short_profiles_s16 = malloc(sizeof(ShortInt));
+	long_profiles_s16 = malloc(sizeof(ShortInt));
+	short_profiles_u16 = malloc(sizeof(UShortInt));
+	long_profiles_u16 = malloc(sizeof(UShortInt));
+	short_profiles_s32 = malloc(sizeof(LongInt));
+	long_profiles_s32 = malloc(sizeof(LongInt));
 	short_profiles_f = malloc(sizeof(float));
 	long_profiles_f = malloc(sizeof(float));
-	short_pps = malloc(sizeof(unsigned long long int));
-	long_pps = malloc(sizeof(unsigned long long int));
+	short_pps = malloc(sizeof(ULongLongInt));
+	long_pps = malloc(sizeof(ULongLongInt));
 
 	// Extract relevant information from path.
 	strncpy(input_file_basename, basename(parameters.target_path), DEFAULT_PATH_LENGTH);
@@ -157,8 +166,13 @@ int main (int argc, char **argv) {
 	strncpy(input_filename, path, DEFAULT_PATH_LENGTH);
 	strncat(input_filename, input_file_basename, DEFAULT_PATH_LENGTH);
 
+	//Set up radar temp filename. Added by Arpan
+	strncpy(radar_filename,input_file_basename,DEFAULT_PATH_LENGTH);
+	strncat(radar_filename,".temp",DEFAULT_PATH_LENGTH);
+
 	// Open temporary radar data file.
-	radar_file = fopen(RADAR_FILENAME, "wb");
+	//radar_file = fopen(RADAR_FILENAME, "wb");
+	radar_file = fopen(radar_filename, "wb"); //Modified by Arpan
 	if (radar_file == NULL) {
 		fprintf(stderr, "Could not create temporary file to store radar data.\n");
 		exit(EXIT_FAILURE);
@@ -226,6 +240,7 @@ int main (int argc, char **argv) {
 				printf("Hit the file limit after processing %d files.\n", files_processed);
 				break;
 			}
+			//break; //check if need to remove later -  Arpan
 		}
 
 		// Update input_filename for the next file in the sequence.
@@ -233,19 +248,20 @@ int main (int argc, char **argv) {
 		sprintf(id_num_string, "%04d", ++file_id);
 		strncat(input_filename, id_num_string, DEFAULT_PATH_LENGTH-strlen(input_filename));
 		strncat(input_filename, ".dat", DEFAULT_PATH_LENGTH-strlen(input_filename)-4);
-
 		// At this point, execution will loop back to try to open the file with filename input_filename.
 	}
 
 	// Close temporary radar data file.
 	fclose(radar_file);
 
+
 	//
 	// Now that the radar file contains only arena payload packets, we can parse to extract profiles.
 	//
 
 	// Open the radar data file.
-	radar_file = fopen(RADAR_FILENAME, "rb");
+	radar_file = fopen(radar_filename, "rb");
+	//radar_file = fopen(RADAR_FILENAME, "rb");
 	if (radar_file == NULL) {
 		fprintf(stderr, "Temporary radar file could not be opened for reading.\n");
 		exit(EXIT_FAILURE);
@@ -282,7 +298,7 @@ int main (int argc, char **argv) {
 		// Process MODE segment.
 		if (current_segment == MODE) {
 			// This is only one byte, so we have what we need.
-			mode = (unsigned short int) *byte_in;
+			mode = (UShortInt) *byte_in;
 
 			// Check that we are expecting this mode.
 			if ((mode != LONG_MODE) && (mode != SHORT_MODE)) {
@@ -365,8 +381,8 @@ int main (int argc, char **argv) {
 						short_profiles_f = realloc(short_profiles_f, profile_structure_length);
 						long_profiles_f = realloc(long_profiles_f, profile_structure_length);
 					}
-					short_pps = realloc(short_pps, sizeof(unsigned long long int) *	profile_structure_length);
-					long_pps = realloc(long_pps, sizeof(unsigned long long int) * profile_structure_length);
+					short_pps = realloc(short_pps, sizeof(ULongLongInt) *	profile_structure_length);
+					long_pps = realloc(long_pps, sizeof(ULongLongInt) * profile_structure_length);
 					// TODO: if we run out of space, reallocate.
 				}
 			}
@@ -494,11 +510,10 @@ int main (int argc, char **argv) {
 
 	// Close temporary radar data file.
 	fclose(radar_file);
-
+	remove(radar_filename); //Added by Arpan to remove the temp radar file
 	//
 	// At this point, radar data has been processed. We just need to copy the appropriate data set to the output matrices and file.
 	//
-
 	// Open the output file.
 	strncpy(mat_filename, preamble, DEFAULT_PATH_LENGTH);
 	mat_filename[strlen(preamble)-1] = '\0';
@@ -511,38 +526,89 @@ int main (int argc, char **argv) {
 
 	// Create output array structures.
 	short_pps_array = mxCreateNumericMatrix(1, short_profile_count, mxUINT64_CLASS, mxREAL);
+	 if (short_pps_array == NULL) {
+      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+      printf("Unable to create mxArray.\n");
+      return(EXIT_FAILURE);
+ 	 }
 	long_pps_array = mxCreateNumericMatrix(1, long_profile_count, mxUINT64_CLASS, mxREAL);
+	if (long_pps_array == NULL) {
+      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+      printf("Unable to create mxArray.\n");
+      return(EXIT_FAILURE);
+  	}
 	if (format == SIGNED_16) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxINT16_CLASS, mxREAL);
+		if (short_array == NULL) {
+	      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      printf("Unable to create mxArray.\n");
+	      return(EXIT_FAILURE);
+			}
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxINT16_CLASS, mxREAL);
-	} else if (format == UNSIGNED_16) {
+		if (long_array == NULL) {
+	      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      printf("Unable to create mxArray.\n");
+	      return(EXIT_FAILURE);
+		}
+	} 
+	else if (format == UNSIGNED_16) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxUINT16_CLASS, mxREAL);
+		if (short_array == NULL) {
+      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      	printf("Unable to create mxArray.\n");
+	      	return(EXIT_FAILURE);
+	 	 }
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxUINT16_CLASS, mxREAL);
+		if (long_array == NULL) {
+      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      	printf("Unable to create mxArray.\n");
+	      	return(EXIT_FAILURE);
+	 	 }
 	} else if (format == SIGNED_32) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxINT32_CLASS, mxCOMPLEX);
+		if (short_array == NULL) {
+      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      	printf("Unable to create mxArray.\n");
+	      	return(EXIT_FAILURE);
+	 	 }
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxINT32_CLASS, mxCOMPLEX);
+		if (long_array == NULL) {
+      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      	printf("Unable to create mxArray.\n");
+	      	return(EXIT_FAILURE);
+	 	 }
 	} else if (format == FLOATING_32) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxSINGLE_CLASS, mxREAL);
+		if (short_array == NULL) {
+      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      	printf("Unable to create mxArray.\n");
+	      	return(EXIT_FAILURE);
+	 	 }
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxSINGLE_CLASS, mxREAL);
+		if (long_array == NULL) {
+      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
+	      	printf("Unable to create mxArray.\n");
+	      	return(EXIT_FAILURE);
+	 	 }
 	}
 
 	// Write internal profile array structures to output array structures.
-	memcpy((void *) mxGetPr(short_pps_array), (void *) short_pps, 1*short_profile_count*sizeof(unsigned long long int));
-	memcpy((void *) mxGetPr(long_pps_array), (void *) long_pps, 1*long_profile_count*sizeof(unsigned long long int));
+	memcpy((void *) mxGetPr(short_pps_array), (void *) short_pps, 1*short_profile_count*sizeof(ULongLongInt));
+	memcpy((void *) mxGetPr(long_pps_array), (void *) long_pps, 1*long_profile_count*sizeof(ULongLongInt));
 	if (format == SIGNED_16) {
-		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_s16, samples_per_profile*short_profile_count*sizeof(short int));
-		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_s16, samples_per_profile*long_profile_count*sizeof(short int));
-	} else if (format == UNSIGNED_16) {
-		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_u16, samples_per_profile*short_profile_count*sizeof(unsigned short int));
-		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_u16, samples_per_profile*long_profile_count*sizeof(unsigned short int));
+		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_s16, samples_per_profile*short_profile_count*sizeof(ShortInt));
+		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_s16, samples_per_profile*long_profile_count*sizeof(ShortInt));
+	} 
+	else if (format == UNSIGNED_16) {
+		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_u16, samples_per_profile*short_profile_count*sizeof(UShortInt));
+		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_u16, samples_per_profile*long_profile_count*sizeof(UShortInt));
 	} else if (format == SIGNED_32) {
-		memcpy(	(void *) mxGetComplexInt32s(short_array), (void *) short_profiles_s32, samples_per_profile*short_profile_count*sizeof(long int)*2);
-		memcpy( (void *) mxGetComplexInt32s(long_array), (void *) long_profiles_s32, samples_per_profile*long_profile_count*sizeof(long int)*2);
+		memcpy(	(void *) mxGetComplexInt32s(short_array), (void *) short_profiles_s32, samples_per_profile*short_profile_count*sizeof(LongInt)*2);
+		memcpy( (void *) mxGetComplexInt32s(long_array), (void *) long_profiles_s32, samples_per_profile*long_profile_count*sizeof(LongInt)*2);
 	} else if (format == FLOATING_32) {
 		memcpy( (void *) mxGetPr(short_array), (void *) short_profiles_f, samples_per_profile*short_profile_count*sizeof(float));
 		memcpy( (void *) mxGetPr(long_array), (void *) long_profiles_f, samples_per_profile*long_profile_count*sizeof(float));
 	}
-
 	// Write output array structures to output file.
 	if (matPutVariable(mat_file, SHORT_PPS_VARIABLE_NAME, short_pps_array) != 0) {
 		fprintf(stderr, "Error writing %s to .mat file.\n", SHORT_PPS_VARIABLE_NAME);
@@ -560,7 +626,7 @@ int main (int argc, char **argv) {
 		fprintf(stderr, "Error writing %s to .mat file.\n", LONG_PROFILES_VARIABLE_NAME);
 		exit(EXIT_FAILURE);
 	}
-
+	printf("Matfile %s created\n",mat_filename);
 	// Print out debug information.
 	if (parameters.debug_mode) {
 		printf("Radar bytes: %lu\n", radar_byte_counter);
@@ -610,6 +676,5 @@ int main (int argc, char **argv) {
 		fprintf(stderr, "Error closing .mat file.\n");
 		exit(EXIT_FAILURE);
 	}
-
 	return 0;
 }

@@ -11,7 +11,6 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 	_Bool input_file_read;
 	FILE *temp_file;
 	char *input_string;
-
 	// Allocate memory for the parameters.
 	parameters.target_path = malloc(DEFAULT_PATH_LENGTH);
 	parameters.file_limit = malloc(sizeof(_Bool));
@@ -23,6 +22,7 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 	input_file_read = FALSE;
 	*(parameters.file_limit) = FALSE;
 	parameters.debug_mode = FALSE;
+	*(parameters.max_files)  = (unsigned short int)1; //Setting default value- Arpan 
 
 	// Loop through the rest of the parameters.
 	for (i = 1; i < argc; i++) {
