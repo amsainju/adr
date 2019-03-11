@@ -26,6 +26,7 @@ int main (int argc, char **argv) {
 	char *mat_filename;
 	char *input_filename;
 	char *radar_filename; //Added by Arpan
+	char *input_filename_withchannel;
 	enum data_format_type format;
 	enum radar_header_segments current_segment;
 	FILE *input_file;
@@ -115,6 +116,7 @@ int main (int argc, char **argv) {
 	mat_filename = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
 	input_filename = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
 	radar_filename = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
+	input_filename_withchannel = malloc(DEFAULT_PATH_LENGTH*sizeof(char));
 	header = malloc(HEADER_LENGTH*sizeof(unsigned char));
 	byte_in = malloc(sizeof(unsigned char));
 	sync_string = malloc(SYNC_LENGTH*sizeof(unsigned char));
@@ -240,7 +242,7 @@ int main (int argc, char **argv) {
 				printf("Hit the file limit after processing %d files.\n", files_processed);
 				break;
 			}
-			//break; //check if need to remove later -  Arpan
+			break; // process only the input file check if need to remove later -  Arpan 
 		}
 
 		// Update input_filename for the next file in the sequence.
@@ -515,9 +517,17 @@ int main (int argc, char **argv) {
 	// At this point, radar data has been processed. We just need to copy the appropriate data set to the output matrices and file.
 	//
 	// Open the output file.
-	strncpy(mat_filename, preamble, DEFAULT_PATH_LENGTH);
-	mat_filename[strlen(preamble)-1] = '\0';
+	strncpy(mat_filename, path, DEFAULT_PATH_LENGTH);
+	strncpy(input_filename_withchannel,input_file_basename,(int)(strlen(input_file_basename))-4);
+	strncat(mat_filename,input_filename_withchannel,strlen(input_filename_withchannel));
+	//strncat(mat_filename, preamble,strlen(preamble));
+	//mat_filename[strlen(mat_filename)-1] = '\0';
+
+	//strncpy(mat_filename, preamble, DEFAULT_PATH_LENGTH);
+	//mat_filename[strlen(preamble)-1] = '\0';
+
 	strncat(mat_filename, ".mat", 4);
+	//printf("matfilename = %s\n",mat_filename);
 	mat_file = matOpen(mat_filename, "w");
 	if (mat_file == NULL) {
 		fprintf(stderr, "Cannot create mat file.\n");
