@@ -6,10 +6,8 @@
 #include "adr.h"
 #include "mat.h"
 typedef unsigned long long int ULongLongInt;
-//typedef long int LongInt;
 typedef unsigned int LongInt;
 typedef short int ShortInt;
-//typedef unsigned long int ULongInt;
 typedef unsigned int ULongInt;
 typedef unsigned short int UShortInt;
 typedef unsigned int UInt;
@@ -242,7 +240,7 @@ int main (int argc, char **argv) {
 				printf("Hit the file limit after processing %d files.\n", files_processed);
 				break;
 			}
-			break; // process only the input file check if need to remove later -  Arpan 
+			//break; // process only the input file check if need to remove later -  Arpan 
 		}
 
 		// Update input_filename for the next file in the sequence.
@@ -516,18 +514,13 @@ int main (int argc, char **argv) {
 	//
 	// At this point, radar data has been processed. We just need to copy the appropriate data set to the output matrices and file.
 	//
+	
 	// Open the output file.
 	strncpy(mat_filename, path, DEFAULT_PATH_LENGTH);
 	strncpy(input_filename_withchannel,input_file_basename,(int)(strlen(input_file_basename))-4);
 	strncat(mat_filename,input_filename_withchannel,strlen(input_filename_withchannel));
-	//strncat(mat_filename, preamble,strlen(preamble));
-	//mat_filename[strlen(mat_filename)-1] = '\0';
-
-	//strncpy(mat_filename, preamble, DEFAULT_PATH_LENGTH);
-	//mat_filename[strlen(preamble)-1] = '\0';
 
 	strncat(mat_filename, ".mat", 4);
-	//printf("matfilename = %s\n",mat_filename);
 	mat_file = matOpen(mat_filename, "w");
 	if (mat_file == NULL) {
 		fprintf(stderr, "Cannot create mat file.\n");
@@ -536,70 +529,19 @@ int main (int argc, char **argv) {
 
 	// Create output array structures.
 	short_pps_array = mxCreateNumericMatrix(1, short_profile_count, mxUINT64_CLASS, mxREAL);
-	 if (short_pps_array == NULL) {
-      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-      printf("Unable to create mxArray.\n");
-      return(EXIT_FAILURE);
- 	 }
 	long_pps_array = mxCreateNumericMatrix(1, long_profile_count, mxUINT64_CLASS, mxREAL);
-	if (long_pps_array == NULL) {
-      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-      printf("Unable to create mxArray.\n");
-      return(EXIT_FAILURE);
-  	}
 	if (format == SIGNED_16) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxINT16_CLASS, mxREAL);
-		if (short_array == NULL) {
-	      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      printf("Unable to create mxArray.\n");
-	      return(EXIT_FAILURE);
-			}
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxINT16_CLASS, mxREAL);
-		if (long_array == NULL) {
-	      printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      printf("Unable to create mxArray.\n");
-	      return(EXIT_FAILURE);
-		}
-	} 
-	else if (format == UNSIGNED_16) {
+	} else if (format == UNSIGNED_16) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxUINT16_CLASS, mxREAL);
-		if (short_array == NULL) {
-      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      	printf("Unable to create mxArray.\n");
-	      	return(EXIT_FAILURE);
-	 	 }
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxUINT16_CLASS, mxREAL);
-		if (long_array == NULL) {
-      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      	printf("Unable to create mxArray.\n");
-	      	return(EXIT_FAILURE);
-	 	 }
 	} else if (format == SIGNED_32) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxINT32_CLASS, mxCOMPLEX);
-		if (short_array == NULL) {
-      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      	printf("Unable to create mxArray.\n");
-	      	return(EXIT_FAILURE);
-	 	 }
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxINT32_CLASS, mxCOMPLEX);
-		if (long_array == NULL) {
-      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      	printf("Unable to create mxArray.\n");
-	      	return(EXIT_FAILURE);
-	 	 }
 	} else if (format == FLOATING_32) {
 		short_array = mxCreateNumericMatrix(samples_per_profile, short_profile_count, mxSINGLE_CLASS, mxREAL);
-		if (short_array == NULL) {
-      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      	printf("Unable to create mxArray.\n");
-	      	return(EXIT_FAILURE);
-	 	 }
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxSINGLE_CLASS, mxREAL);
-		if (long_array == NULL) {
-      		printf("%s : Out of memory on line %d\n", __FILE__, __LINE__); 
-	      	printf("Unable to create mxArray.\n");
-	      	return(EXIT_FAILURE);
-	 	 }
 	}
 
 	// Write internal profile array structures to output array structures.
@@ -608,8 +550,7 @@ int main (int argc, char **argv) {
 	if (format == SIGNED_16) {
 		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_s16, samples_per_profile*short_profile_count*sizeof(ShortInt));
 		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_s16, samples_per_profile*long_profile_count*sizeof(ShortInt));
-	} 
-	else if (format == UNSIGNED_16) {
+	} else if (format == UNSIGNED_16) {
 		memcpy((void *) mxGetPr(short_array), (void *) short_profiles_u16, samples_per_profile*short_profile_count*sizeof(UShortInt));
 		memcpy((void *) mxGetPr(long_array), (void *) long_profiles_u16, samples_per_profile*long_profile_count*sizeof(UShortInt));
 	} else if (format == SIGNED_32) {
@@ -640,11 +581,11 @@ int main (int argc, char **argv) {
 	// Print out debug information.
 	if (parameters.debug_mode) {
 		printf("Radar bytes: %lu\n", radar_byte_counter);
-		printf("Profiles processed: %I64u\n", profile_count);
-		printf("\t\tShort: %I64u\n", short_profile_count);
-		printf("\t\t\tIndex: %I64u\n", short_index);
-		printf("\t\tLong: %I64u\n", long_profile_count);
-		printf("\t\t\tIndex: %I64u\n", long_index);
+		printf("Profiles processed: %llu\n", profile_count);
+		printf("\t\tShort: %llu\n", short_profile_count);
+		printf("\t\t\tIndex: %llu\n", short_index);
+		printf("\t\tLong: %llu\n", long_profile_count);
+		printf("\t\t\tIndex: %llu\n", long_index);
 	}
 
 	// Clean up.
@@ -686,5 +627,6 @@ int main (int argc, char **argv) {
 		fprintf(stderr, "Error closing .mat file.\n");
 		exit(EXIT_FAILURE);
 	}
+
 	return 0;
 }

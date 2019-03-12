@@ -1,6 +1,9 @@
 # adr
 Data reader for the ARENA 313 modules.
 
+## Current status
+Linux development is underway. The system *should* still build under Windows, but this will likely be broken as development continues. Contact me for more fine-grain updates.
+
 ## Release version
 The release version of this software may be downloaded from the 'binaries' subdirectory.
 
@@ -50,7 +53,7 @@ This software stores data in MATLAB matrices in a .mat file that uses the file n
 
 To import this data into MATLAB, you would simply use the command:
 ```
-load('C:\PATH\TO\FILE\20180709_180156.mat')
+load('C:\PATH\TO\FILE\20180709_180156_Channel7_0000.mat')
 ```
 
 At this point, four matrices should be visible in your workspace:
@@ -60,3 +63,4 @@ At this point, four matrices should be visible in your workspace:
 * Short_Chirp_Profiles
 
 Their names should be self-explanatory.
+
