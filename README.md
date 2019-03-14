@@ -38,12 +38,10 @@ $./adr -i infile -sm 3
 ```
 where 3 is the short mode value (this defaults to 1 if this parameter is not given).
 ```
-```
 $./adr -i infile -pc 400000
 ```
 where 400000 is the profile count value (this defaults to 32,76800 if this parameter is not given).
 ```
-
 ./adr -h
 ```
 to show usage information.
