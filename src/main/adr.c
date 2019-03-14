@@ -17,6 +17,8 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 	parameters.max_files = malloc(sizeof(unsigned short int));
 	input_string = malloc(DEFAULT_NUMBER_LENGTH*sizeof(char));
 	parameters.range = DEFAULT_PROFILE_BYTE_LENGTH;
+	parameters.short_mode = SHORT_MODE;
+	parameters.profile_count = DEFAULT_PROFILE_COUNT;
 
 	// Initialize local parameters.
 	input_file_read = FALSE;
@@ -72,7 +74,29 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 				fprintf(stderr, "No parameter given after \"-r\". Exiting.\n");
 				exit(EXIT_FAILURE);
 			}
-		} else if (!strcmp(argv[i], "-h")) {
+		} else if (!strcmp(argv[i], "-sm")) {
+			// A value for short mode is supplied. Overwrite the default.
+			if ((i + 1) < argc) {
+				// Grab the needed information from the parameter list.
+				strncpy(input_string, argv[++i], SHORT_MODE);
+				parameters.short_mode = (unsigned short int) atoi(input_string);
+			} else {
+				// Not enough parameters left to do this. Exit.
+				fprintf(stderr, "No parameter given after \"-sm\". Exiting.\n");
+				exit(EXIT_FAILURE);
+			}
+		}else if (!strcmp(argv[i], "-pc")) {
+			// A value for profile count is supplied. Overwrite the default.
+			if ((i + 1) < argc) {
+				// Grab the needed information from the parameter list.
+				strncpy(input_string, argv[++i], DEFAULT_PROFILE_COUNT);
+				parameters.profile_count = (int) atoi(input_string);
+			} else {
+				// Not enough parameters left to do this. Exit.
+				fprintf(stderr, "No parameter given after \"-pc\". Exiting.\n");
+				exit(EXIT_FAILURE);
+			}
+		}else if (!strcmp(argv[i], "-h")) {
 			// Print out help information.
 			printf("usage: adr.exe -i infile [-m max_files] [-p max_profiles]\n");
 			printf("\t-i infile\tinfile is the input file to begin processing\n");

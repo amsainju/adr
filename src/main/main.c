@@ -301,7 +301,7 @@ int main (int argc, char **argv) {
 			mode = (UShortInt) *byte_in;
 
 			// Check that we are expecting this mode.
-			if ((mode != LONG_MODE) && (mode != SHORT_MODE)) {
+			if ((mode != LONG_MODE) && (mode != parameters.short_mode)) {
 				fprintf(stderr, "Unknown mode encountered.\n");
 				exit(EXIT_FAILURE);
 			}
@@ -367,7 +367,7 @@ int main (int argc, char **argv) {
 				// While here, allocate data for the profile matrices.
 				if (profile_count == 0) {
 					samples_per_profile = profile_byte_length / sample_size;
-					profile_structure_length = samples_per_profile * DEFAULT_PROFILE_COUNT;
+					profile_structure_length = samples_per_profile * parameters.profile_count;
 					if (format == SIGNED_16) {
 						short_profiles_s16 = realloc(short_profiles_s16, profile_structure_length);
 						long_profiles_s16 = realloc(long_profiles_s16, profile_structure_length);
@@ -405,7 +405,7 @@ int main (int argc, char **argv) {
 				if (format == SIGNED_16) {
 					sample_s16 =
 							(*(sample_string+1) << 8) + *(sample_string);
-					if (mode == SHORT_MODE) {
+					if (mode == parameters.short_mode) {
 						*(short_profiles_s16+short_index++) = sample_s16;
 					} else if (mode == LONG_MODE) {
 						*(long_profiles_s16+long_index++) = sample_s16;
@@ -413,7 +413,7 @@ int main (int argc, char **argv) {
 				} else if (format == UNSIGNED_16) {
 					sample_u16 =
 							(*(sample_string+1) << 8) + *(sample_string);
-					if (mode == SHORT_MODE) {
+					if (mode == parameters.short_mode) {
 						*(short_profiles_u16+short_index++) = sample_u16;
 					} else if (mode == LONG_MODE) {
 						*(long_profiles_u16+long_index++) = sample_u16;
@@ -429,7 +429,7 @@ int main (int argc, char **argv) {
 							(*(sample_string+6) << 16) +
 							(*(sample_string+5) << 8) +
 							*(sample_string+4);
-					if (mode == SHORT_MODE) {
+					if (mode == parameters.short_mode) {
 						*(short_profiles_s32+short_index++) = sample_s32r;
 						*(short_profiles_s32+short_index++) = sample_s32i;
 					} else if (mode == LONG_MODE) {
@@ -442,7 +442,7 @@ int main (int argc, char **argv) {
 							(*(sample_string+2) << 16) +
 							(*(sample_string+1) << 8) +
 							*(sample_string);
-					if (mode == SHORT_MODE) {
+					if (mode == parameters.short_mode) {
 						*(short_profiles_f+short_index++) = sample_f;
 					} else if (mode == LONG_MODE) {
 						*(long_profiles_f+long_index++) = sample_f;
@@ -452,7 +452,7 @@ int main (int argc, char **argv) {
 
 			// If the last byte of the profile, increment the appropriate profile counter and store the PPS counter.
 			if (segment_counter == (profile_byte_length -1 )) {
-				if (mode == SHORT_MODE) {
+				if (mode == parameters.short_mode) {
 					*(short_pps + short_profile_count++) = pps_counter;
 				} else if (mode == LONG_MODE) {
 					*(long_pps + long_profile_count++) = pps_counter;

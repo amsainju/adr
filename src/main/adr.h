@@ -7,7 +7,7 @@
 #define FALSE							0
 
 #define LONG_MODE						0
-#define SHORT_MODE						3
+#define SHORT_MODE						1 //1 for CO, 3 for Greenland 2018 and Japan Data
 
 #define RADAR_FILENAME					"radar.tmp.dat"
 
@@ -41,7 +41,7 @@
 #define PROFILE_DATA_FORMAT_LENGTH		4
 #define PROFILE_LENGTH_LENGTH			4
 
-#define DEFAULT_PROFILE_COUNT			32768
+#define DEFAULT_PROFILE_COUNT			3276800
 #define DEFAULT_UDP_PAYLOAD_LENGTH		8192
 #define DEFAULT_PROFILE_BYTE_LENGTH		32768
 
@@ -76,6 +76,8 @@ struct input_parameters {
 	unsigned short int *max_files;
 	_Bool debug_mode;
 	unsigned short int range;
+    unsigned short int short_mode;
+    int profile_count;
 };
 
 struct input_parameters parse_command_line_parameters(int, char **);
