@@ -2,15 +2,12 @@
 Data reader for the ARENA 313 modules.
 
 ## Current status
-Linux development is underway. The system *should* still build under Windows, but this will likely be broken as development continues. Contact me for more fine-grain updates.
+Linux development is underway. Contact me for more fine-grain updates.
 
 ## Release version
 The release version of this software may be downloaded from the 'binaries' subdirectory.
 
 ## Important notes
-Please ensure that your MATLAB binary folder is on your system (or user) path. For example, for a default MATLAB R2018a installation, this would be 'C:\Program Files\MATLAB\R2018a\bin\win64'.
-
-This software assumes that there are two modes of samples, each numbered 0 and 3, respectively. *If this changes, it will require alteration of the code.*
 
 This software also assumes that no more than 32,76800 profiles will be processed at any one time. This needs to change eventually and will only require an occassional check to see if we need to reallocate for more memory. The decision was made not to pursue this at this time to keep the execution time low. This reallocation will take a relatively large amount of time.
 
@@ -47,11 +44,11 @@ $./adr -i infile -pc 400000
 where 400000 is the profile count value (this defaults to 32,76800 if this parameter is not given).
 ```
 
-adr.exe -h
+./adr -h
 ```
 to show usage information.
 ```
-adr.exe -i infile -d
+./adr -i infile -d
 ```
 to show debug information while executing.
 
