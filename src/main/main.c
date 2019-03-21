@@ -299,7 +299,7 @@ int main (int argc, char **argv) {
 		if (current_segment == MODE) {
 			// This is only one byte, so we have what we need.
 			mode = (UShortInt) *byte_in;
-
+			
 			// Check that we are expecting this mode.
 			if ((mode != LONG_MODE) && (mode != parameters.short_mode)) {
 				fprintf(stderr, "Unknown mode encountered.\n");
@@ -387,7 +387,6 @@ int main (int argc, char **argv) {
 				}
 			}
 		}
-
 		// Process PROFILE_DATA segment.
 		if (current_segment == PROFILE_DATA) {
 			// Store the current byte in the string.

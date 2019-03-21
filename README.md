@@ -68,7 +68,7 @@ At this point, four matrices should be visible in your workspace:
 
 Their names should be self-explanatory.
 
-## Compilation 
+## Linux Compilation 
 Before you run the compilation command make sure libmat.so and libmx.so  are present in the same directory as adr.c adr.h and main.c. 
 ```
 $ export PATH=/YOUR_PATH/Matlab2018a/bin:$PATH
@@ -76,5 +76,11 @@ $ export PATH=/YOUR_PATH/Matlab2018a/bin:$PATH
 $ export LD_LIBRARY_PATH=/YOUR_PATH/Matlab2018a/bin/glnxa64:$LD_LIBRARY_PATH
 
 $ gcc -L /YOUR_PATH/Matlab2018a/bin/glnxa64 -L /YOUR_PATH/Matlab2018a/sys/os/glnxa64 -I /YOUR_PATH/Matlab2018a/extern/include -o adr adr.c main.c -lm -lmat -lmx
+```
+
+## Windows Compilation
+Before you run the compilation command make sure libmat.dll and libmx.dll  are present in the same directory as adr.c adr.h and main.c. 
+```
+C:\ADR_PATH> gcc *.c  -IC:\PROGRA~1\MATLAB\R2018a\extern\include -LC:\PROGRA~1\MATLAB\R2018a\extern\lib\win64\mingw64 -o adr -l libmat -l libmx
 ```
 

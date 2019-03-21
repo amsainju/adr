@@ -55,7 +55,7 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			if ((i + 1) < argc) {
 				// Grab the needed information from the parameter list.
 				*(parameters.file_limit) = TRUE;
-				strncpy(input_string, argv[++i], DEFAULT_NUMBER_LENGTH);
+				strcpy(input_string,argv[++i]);
 				*(parameters.max_files) =
 						(unsigned short int) atoi(input_string);
 			} else {
@@ -67,7 +67,7 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			// A value for range gates is supplied. Overwrite the default.
 			if ((i + 1) < argc) {
 				// Grab the needed information from the parameter list.
-				strncpy(input_string, argv[++i], DEFAULT_NUMBER_LENGTH);
+				strcpy(input_string,argv[++i]);
 				parameters.range = (unsigned short int) atoi(input_string);
 			} else {
 				// Not enough parameters left to do this. Exit.
@@ -78,22 +78,22 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			// A value for short mode is supplied. Overwrite the default.
 			if ((i + 1) < argc) {
 				// Grab the needed information from the parameter list.
-				strncpy(input_string, argv[++i], SHORT_MODE);
+				strcpy(input_string,argv[++i]);
 				parameters.short_mode = (unsigned short int) atoi(input_string);
 			} else {
 				// Not enough parameters left to do this. Exit.
 				fprintf(stderr, "No parameter given after \"-sm\". Exiting.\n");
 				exit(EXIT_FAILURE);
 			}
-		}else if (!strcmp(argv[i], "-pc")) {
+		}else if (!strcmp(argv[i], "-p")) {
 			// A value for profile count is supplied. Overwrite the default.
 			if ((i + 1) < argc) {
 				// Grab the needed information from the parameter list.
-				strncpy(input_string, argv[++i], DEFAULT_PROFILE_COUNT);
+				strcpy(input_string,argv[++i]);
 				parameters.profile_count = (int) atoi(input_string);
 			} else {
 				// Not enough parameters left to do this. Exit.
-				fprintf(stderr, "No parameter given after \"-pc\". Exiting.\n");
+				fprintf(stderr, "No parameter given after \"-p\". Exiting.\n");
 				exit(EXIT_FAILURE);
 			}
 		}else if (!strcmp(argv[i], "-h")) {
@@ -101,6 +101,8 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			printf("usage: adr.exe -i infile [-m max_files] [-p max_profiles]\n");
 			printf("\t-i infile\tinfile is the input file to begin processing\n");
 			printf("\t-m max_files\t(optional) process only max_files files\n");
+			printf("\t-r range\t(optional) provide the range value\n");
+			printf("\t-sm short_mode\t(optional) provide the short mode value\n");
 			printf("\t-p max_profiles\t(optional) process only max_profiles profiles\n");
 		} else if (!strcmp(argv[i], "-v")) {
 			// Print out version information.
@@ -111,9 +113,12 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			parameters.debug_mode = TRUE;
 		} else {
 			// Unknown argument.
-			fprintf(stderr, "usage: adr.exe -i infile [-m max_files] [-p max_profiles]\n");
+			fprintf(stderr, "usage: adr.exe -i infile [-sm short_mode] [-r range] [-m max_files] [-p max_profiles] \n");
 			fprintf(stderr,
 					"\t-i infile\tinfile is the input file to begin processing\n");
+
+			fprintf(stderr, "\t-sm short_mode\t(optional) provide the short mode value\n");
+			fprintf(stderr, "\t-r range\t(optional) provide the range value\n");
 			fprintf(stderr,
 					"\t-m max_files\t(optional) process only max_files files\n");
 			fprintf(stderr, "\t-p max_profiles\t(optional) process only max_profiles profiles\n");
