@@ -157,6 +157,7 @@ int main (int argc, char **argv) {
 	file_id = atoi(id_num_string);
 	for (i = 0; id_string[i] != '_'; i++);
 	id_string[i] = '\0';
+	//printf("file_id is %d\n", file_id);
 
 	//
 	// Read through files and strip the radar packets, storing them in a temporary file.
@@ -182,6 +183,9 @@ int main (int argc, char **argv) {
 	while (TRUE) {
 		// Open input file.
 		input_file = fopen(input_filename, "rb");
+		//printf("filename is %s\n", input_filename);
+		//getchar();
+		
 		if (input_file == NULL) {
 			if (parameters.debug_mode) {
 				printf("%s not found. End of data.\n", input_filename);
@@ -198,19 +202,29 @@ int main (int argc, char **argv) {
 			if (fread(header, sizeof(unsigned char), HEADER_LENGTH, input_file) != HEADER_LENGTH) {
 				// We didn't successfully read this header. This file is complete.
 				// Bounce out of this loop so the next file can be processed.
+				//printf("didn't successfully read this UDP header!\n");
 				break;
+				
 			} else {
 				// We did read this header successfully.
 				packet_bytes += HEADER_LENGTH;
 
 				// Extract the packet length from the header.
-				arena_payload_length = data_to_num(header+ARENA_PAYLOAD_LENGTH_OFFSET, ARENA_PAYLOAD_LENGTH_LENGTH) - 16;
+				arena_payload_length = data_to_num(header+ARENA_PAYLOAD_LENGTH_OFFSET, ARENA_PAYLOAD_LENGTH_LENGTH);
+				if(arena_payload_length <16 ) { printf("arena payload length in header is smaller than 16, error and stop reading .dat now!\n"); break; }
+				if(arena_payload_length >16) arena_payload_length -= 16;
+				
+				//printf("arena_payload_length = %llu, %u\n", arena_payload_length,arena_payload_length);
+				//getchar();
+					
 			}
 
 			// Now we know there is a UDP payload of arena_payload_length bytes available. Get them.
 			for (i = 0; i < arena_payload_length; i++) {
 				if (fread(byte_in, sizeof(unsigned char), 1, input_file) != 1) {
 					// Could not read this byte.
+					printf("Error: could not read this Byte_in, arena_payload_length %llu\n",arena_payload_length);
+					//getchar();
 					break;
 				} else {
 					// Byte in 'byte_in'.
@@ -233,6 +247,9 @@ int main (int argc, char **argv) {
 		// Close up the processed file.
 		fclose(input_file);
 
+		//printf("finish processing one file in the sequence\n");
+		//getchar();
+
 		// Have we hit our file limit?
 		files_processed++;
 		if (parameters.file_limit && (*(parameters.max_files) == files_processed)) {
@@ -240,7 +257,7 @@ int main (int argc, char **argv) {
 				printf("Hit the file limit after processing %d files.\n", files_processed);
 				break;
 			}
-			//break; // process only the input file check if need to remove later -  Arpan 
+			break; // process only the input file check if need to remove later -  Arpan 
 		}
 
 		// Update input_filename for the next file in the sequence.
@@ -272,6 +289,7 @@ int main (int argc, char **argv) {
 		// Read in the next byte and bounce out if we're at the end of the file.
 		if(fread(byte_in, sizeof(unsigned char), 1, radar_file) != 1) {
 			// Read was unsuccessful. Assume end of data.
+			//printf("end of temporary file, cannot read Byte!\n");
 			break;
 		}
 
@@ -286,6 +304,7 @@ int main (int argc, char **argv) {
 					// Sync not found! Search for it.
 					if (resync(radar_file, byte_in, parameters) == 0) {
 						// Sync word was never found. We're done.
+						//printf("Sync word never found. We're done.\n");
 						break;
 					}
 				}
@@ -302,7 +321,8 @@ int main (int argc, char **argv) {
 			
 			// Check that we are expecting this mode.
 			if ((mode != LONG_MODE) && (mode != parameters.short_mode)) {
-				fprintf(stderr, "Unknown mode encountered.\n");
+				fprintf(stderr, "Unknown mode encountered. mode value=%d, should be %d\n",mode, parameters.short_mode);
+				
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -543,6 +563,7 @@ int main (int argc, char **argv) {
 		long_array = mxCreateNumericMatrix(samples_per_profile, long_profile_count, mxSINGLE_CLASS, mxREAL);
 	}
 
+	//printf("before writing internal profile array structure to array structures!\n");
 	// Write internal profile array structures to output array structures.
 	memcpy((void *) mxGetPr(short_pps_array), (void *) short_pps, 1*short_profile_count*sizeof(ULongLongInt));
 	memcpy((void *) mxGetPr(long_pps_array), (void *) long_pps, 1*long_profile_count*sizeof(ULongLongInt));
@@ -559,6 +580,8 @@ int main (int argc, char **argv) {
 		memcpy( (void *) mxGetPr(short_array), (void *) short_profiles_f, samples_per_profile*short_profile_count*sizeof(float));
 		memcpy( (void *) mxGetPr(long_array), (void *) long_profiles_f, samples_per_profile*long_profile_count*sizeof(float));
 	}
+
+	//printf("Matlab Matrix completed!\n");
 	// Write output array structures to output file.
 	if (matPutVariable(mat_file, SHORT_PPS_VARIABLE_NAME, short_pps_array) != 0) {
 		fprintf(stderr, "Error writing %s to .mat file.\n", SHORT_PPS_VARIABLE_NAME);

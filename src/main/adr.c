@@ -68,6 +68,7 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			if ((i + 1) < argc) {
 				// Grab the needed information from the parameter list.
 				strcpy(input_string,argv[++i]);
+				//printf("input string range = %s", input_string);
 				parameters.range = (unsigned short int) atoi(input_string);
 			} else {
 				// Not enough parameters left to do this. Exit.
@@ -79,6 +80,7 @@ struct input_parameters parse_command_line_parameters (int argc, char *argv[]) {
 			if ((i + 1) < argc) {
 				// Grab the needed information from the parameter list.
 				strcpy(input_string,argv[++i]);
+				//printf("input string shortmode  = %s", input_string);
 				parameters.short_mode = (unsigned short int) atoi(input_string);
 			} else {
 				// Not enough parameters left to do this. Exit.
